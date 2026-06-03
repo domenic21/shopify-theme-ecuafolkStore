@@ -372,5 +372,111 @@
     {%- if settings.cart_type == 'drawer' -%}
       <script src="{{ 'cart-drawer.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
+
+    <!-- Global search overlay: always present on every page so search-trigger works site-wide -->
+    <div id="ecuafolk-global-search-overlay" style="display:block;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;opacity:0;visibility:hidden;transition:opacity 0.3s ease,visibility 0.3s ease;pointer-events:none;">
+      <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;">
+        <button id="ecuafolk-search-close" type="button" aria-label="Cerrar búsqueda" style="position:absolute;top:20px;right:20px;background:#333;color:#fff;border:none;border-radius:8px;width:48px;height:48px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div style="width:100%;max-width:640px;margin-top:80px;">
+          <div style="position:relative;margin-bottom:20px;">
+            <input id="ecuafolk-search-input" type="text" placeholder="Buscar productos..." autocomplete="off" style="width:100%;padding:18px 24px;font-size:18px;border:2px solid #555;border-radius:8px;background:#1a1a1a;color:#fff;outline:none;box-sizing:border-box;">
+          </div>
+          <div id="ecuafolk-search-loading" style="text-align:center;color:#aaa;padding:12px;display:none;">Buscando...</div>
+          <div id="ecuafolk-search-results"></div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      #ecuafolk-global-search-overlay.is-open { opacity:1; visibility:visible; pointer-events:auto; }
+      #ecuafolk-search-input:focus { border-color:#dc143c; }
+      .ecuafolk-result-item { display:flex;gap:16px;padding:14px;background:#222;border-radius:8px;margin-bottom:10px;text-decoration:none;color:#fff;transition:background 0.2s; }
+      .ecuafolk-result-item:hover { background:#333; }
+      .ecuafolk-result-img { width:70px;height:70px;flex-shrink:0;border-radius:6px;overflow:hidden;background:#333; }
+      .ecuafolk-result-img img { width:100%;height:100%;object-fit:cover; }
+      .ecuafolk-result-info { display:flex;flex-direction:column;justify-content:center;gap:4px; }
+      .ecuafolk-result-title { font-size:15px;font-weight:600; }
+      .ecuafolk-result-price { font-size:14px;color:#dc143c;font-weight:600; }
+      .ecuafolk-no-results { text-align:center;color:#aaa;padding:30px;font-size:16px; }
+    </style>
+
+    <script>
+      (function() {
+        var overlay = document.getElementById('ecuafolk-global-search-overlay');
+        var closeBtn = document.getElementById('ecuafolk-search-close');
+        var input = document.getElementById('ecuafolk-search-input');
+        var results = document.getElementById('ecuafolk-search-results');
+        var loading = document.getElementById('ecuafolk-search-loading');
+        var searchTimer = null;
+
+        function openOverlay() {
+          overlay.classList.add('is-open');
+          document.body.style.overflow = 'hidden';
+          setTimeout(function() { input.focus(); }, 100);
+        }
+
+        function closeOverlay() {
+          overlay.classList.remove('is-open');
+          document.body.style.overflow = '';
+          input.value = '';
+          results.innerHTML = '';
+          loading.style.display = 'none';
+        }
+
+        // Expose globally so other scripts can call them
+        window.openSearchOverlay = openOverlay;
+        window.closeSearchOverlay = closeOverlay;
+
+        // Close button
+        closeBtn.addEventListener('click', closeOverlay);
+
+        // Close on backdrop click (outside the search box)
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) closeOverlay();
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') closeOverlay();
+        });
+
+        // Open when any .search-trigger is clicked
+        document.addEventListener('click', function(e) {
+          if (e.target.closest('.search-trigger')) {
+            e.preventDefault();
+            openOverlay();
+          }
+        });
+
+        // Live search
+        input.addEventListener('input', function() {
+          clearTimeout(searchTimer);
+          var q = input.value.trim();
+          results.innerHTML = '';
+          if (q.length < 2) { loading.style.display = 'none'; return; }
+          loading.style.display = 'block';
+          searchTimer = setTimeout(function() {
+            fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=8')
+              .then(function(r) { return r.json(); })
+              .then(function(data) {
+                loading.style.display = 'none';
+                var products = (data.resources && data.resources.results && data.resources.results.products) || [];
+                if (products.length === 0) {
+                  results.innerHTML = '<div class="ecuafolk-no-results">No se encontraron productos</div>';
+                  return;
+                }
+                results.innerHTML = products.map(function(p) {
+                  var price = p.price ? '$' + (p.price / 100).toFixed(2) + ' USD' : '';
+                  var img = p.image ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy">' : '';
+                  return '<a href="' + p.url + '" class="ecuafolk-result-item"><div class="ecuafolk-result-img">' + img + '</div><div class="ecuafolk-result-info"><div class="ecuafolk-result-title">' + p.title + '</div><div class="ecuafolk-result-price">' + price + '</div></div></a>';
+                }).join('');
+              })
+              .catch(function() { loading.style.display = 'none'; });
+          }, 300);
+        });
+      })();
+    </script>
   </body>
 </html>
