@@ -1,0 +1,714 @@
+{% doc %}
+  @prompt
+    Create a mobile-first horizontal scrollable categories section for EcuaFolk, an Ecuadorian food store. Display category circles with an image and label underneath. Categories include Dulces, Condimentos, Snacks, Atún. On mobile it should scroll horizontally so all categories are accessible with a swipe. Each category should link to a collection. Include theme editor settings to add and edit categories. Add detailed code comments throughout explaining every Liquid tag, CSS class, and schema setting so a developer can understand and modify the code easily.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-category-scroll-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.section_padding_mobile }}px 0;
+  }
+
+  .ai-category-scroll__container-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0 {{ block.settings.container_padding_mobile }}px;
+  }
+
+  .ai-category-scroll__heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_size_mobile }}px;
+    color: {{ block.settings.heading_color }};
+    margin: 0 0 {{ block.settings.heading_spacing }}px 0;
+    text-align: {{ block.settings.heading_alignment }};
+  }
+
+  .ai-category-scroll__wrapper-{{ ai_gen_id }} {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-category-scroll__wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-category-scroll__list-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.category_gap_mobile }}px;
+    padding: {{ block.settings.scroll_padding }}px 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .ai-category-scroll__item-{{ ai_gen_id }} {
+    flex: 0 0 auto;
+    width: {{ block.settings.category_size_mobile }}px;
+  }
+
+  .ai-category-scroll__link-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    gap: {{ block.settings.label_spacing }}px;
+  }
+
+  .ai-category-scroll__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: {{ block.settings.category_size_mobile }}px;
+    height: {{ block.settings.category_size_mobile }}px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: {{ block.settings.circle_background }};
+    border: {{ block.settings.circle_border_width }}px solid {{ block.settings.circle_border_color }};
+    transition: transform 0.3s ease;
+  }
+
+  .ai-category-scroll__link-{{ ai_gen_id }}:hover .ai-category-scroll__image-wrapper-{{ ai_gen_id }} {
+    transform: scale(1.05);
+  }
+
+  .ai-category-scroll__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-category-scroll__placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: {{ block.settings.placeholder_background }};
+  }
+
+  .ai-category-scroll__placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-category-scroll__label-{{ ai_gen_id }} {
+    font-size: {{ block.settings.label_size_mobile }}px;
+    color: {{ block.settings.label_color }};
+    text-align: center;
+    word-wrap: break-word;
+    max-width: {{ block.settings.category_size_mobile }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-category-scroll-{{ ai_gen_id }} {
+      padding: {{ block.settings.section_padding_desktop }}px 0;
+    }
+
+    .ai-category-scroll__container-{{ ai_gen_id }} {
+      padding: 0 {{ block.settings.container_padding_desktop }}px;
+    }
+
+    .ai-category-scroll__heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.heading_size_desktop }}px;
+    }
+
+    .ai-category-scroll__list-{{ ai_gen_id }} {
+      gap: {{ block.settings.category_gap_desktop }}px;
+      {% if block.settings.center_on_desktop %}
+        justify-content: center;
+      {% endif %}
+    }
+
+    .ai-category-scroll__item-{{ ai_gen_id }} {
+      width: {{ block.settings.category_size_desktop }}px;
+    }
+
+    .ai-category-scroll__image-wrapper-{{ ai_gen_id }} {
+      width: {{ block.settings.category_size_desktop }}px;
+      height: {{ block.settings.category_size_desktop }}px;
+    }
+
+    .ai-category-scroll__label-{{ ai_gen_id }} {
+      font-size: {{ block.settings.label_size_desktop }}px;
+      max-width: {{ block.settings.category_size_desktop }}px;
+    }
+  }
+{% endstyle %}
+
+<category-scroll-{{ ai_gen_id }} class="ai-category-scroll-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-category-scroll__container-{{ ai_gen_id }}">
+    {% if block.settings.heading != blank %}
+      <h2 class="ai-category-scroll__heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
+    {% endif %}
+
+    <div class="ai-category-scroll__wrapper-{{ ai_gen_id }}">
+      <ul class="ai-category-scroll__list-{{ ai_gen_id }}">
+        {% for i in (1..8) %}
+          {% liquid
+            assign category_enabled_key = 'category_' | append: i | append: '_enabled'
+            assign category_label_key = 'category_' | append: i | append: '_label'
+            assign category_image_key = 'category_' | append: i | append: '_image'
+            assign category_collection_key = 'category_' | append: i | append: '_collection'
+
+            assign category_enabled = block.settings[category_enabled_key]
+            assign category_label = block.settings[category_label_key]
+            assign category_image = block.settings[category_image_key]
+            assign category_collection = block.settings[category_collection_key]
+          %}
+
+          {% if category_enabled %}
+            <li class="ai-category-scroll__item-{{ ai_gen_id }}">
+              {% if category_collection != blank %}
+                <a href="{{ category_collection.url }}" class="ai-category-scroll__link-{{ ai_gen_id }}">
+              {% else %}
+                <div class="ai-category-scroll__link-{{ ai_gen_id }}">
+              {% endif %}
+                
+                <div class="ai-category-scroll__image-wrapper-{{ ai_gen_id }}">
+                  {% if category_image != blank %}
+                    <img
+                      src="{{ category_image | image_url: width: 400 }}"
+                      alt="{{ category_label | escape }}"
+                      class="ai-category-scroll__image-{{ ai_gen_id }}"
+                      loading="lazy"
+                      width="400"
+                      height="400"
+                    >
+                  {% else %}
+                    <div class="ai-category-scroll__placeholder-{{ ai_gen_id }}">
+                      {{ 'product-1' | placeholder_svg_tag }}
+                    </div>
+                  {% endif %}
+                </div>
+
+                {% if category_label != blank %}
+                  <span class="ai-category-scroll__label-{{ ai_gen_id }}">{{ category_label }}</span>
+                {% endif %}
+
+              {% if category_collection != blank %}
+                </a>
+              {% else %}
+                </div>
+              {% endif %}
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</category-scroll-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CategoryScroll{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.wrapper = this.querySelector('.ai-category-scroll__wrapper-{{ ai_gen_id }}');
+        this.setupTouchScroll();
+      }
+
+      setupTouchScroll() {
+        if (!this.wrapper) return;
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        this.wrapper.addEventListener('mousedown', (e) => {
+          isDown = true;
+          this.wrapper.style.cursor = 'grabbing';
+          startX = e.pageX - this.wrapper.offsetLeft;
+          scrollLeft = this.wrapper.scrollLeft;
+        });
+
+        this.wrapper.addEventListener('mouseleave', () => {
+          isDown = false;
+          this.wrapper.style.cursor = 'grab';
+        });
+
+        this.wrapper.addEventListener('mouseup', () => {
+          isDown = false;
+          this.wrapper.style.cursor = 'grab';
+        });
+
+        this.wrapper.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - this.wrapper.offsetLeft;
+          const walk = (x - startX) * 2;
+          this.wrapper.scrollLeft = scrollLeft - walk;
+        });
+      }
+    }
+
+    customElements.define('category-scroll-{{ ai_gen_id }}', CategoryScroll{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Category scroll",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by category"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#121212"
+    },
+    {
+      "type": "range",
+      "id": "heading_size_mobile",
+      "label": "Heading size (mobile)",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "heading_size_desktop",
+      "label": "Heading size (desktop)",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "heading_spacing",
+      "label": "Heading spacing",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Maximum width",
+      "min": 600,
+      "max": 1600,
+      "step": 100,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "section_padding_mobile",
+      "label": "Section padding (mobile)",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "section_padding_desktop",
+      "label": "Section padding (desktop)",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "container_padding_mobile",
+      "label": "Container padding (mobile)",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "container_padding_desktop",
+      "label": "Container padding (desktop)",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Category style"
+    },
+    {
+      "type": "range",
+      "id": "category_size_mobile",
+      "label": "Circle size (mobile)",
+      "min": 60,
+      "max": 140,
+      "step": 10,
+      "unit": "px",
+      "default": 90
+    },
+    {
+      "type": "range",
+      "id": "category_size_desktop",
+      "label": "Circle size (desktop)",
+      "min": 80,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "category_gap_mobile",
+      "label": "Gap between items (mobile)",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "category_gap_desktop",
+      "label": "Gap between items (desktop)",
+      "min": 12,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "scroll_padding",
+      "label": "Scroll padding",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "center_on_desktop",
+      "label": "Center categories on desktop",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "circle_background",
+      "label": "Circle background",
+      "default": "#f3f3f3"
+    },
+    {
+      "type": "range",
+      "id": "circle_border_width",
+      "label": "Circle border width",
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "color",
+      "id": "circle_border_color",
+      "label": "Circle border color",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "color",
+      "id": "placeholder_background",
+      "label": "Placeholder background",
+      "default": "#f3f3f3"
+    },
+    {
+      "type": "header",
+      "content": "Label style"
+    },
+    {
+      "type": "range",
+      "id": "label_size_mobile",
+      "label": "Label size (mobile)",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "label_size_desktop",
+      "label": "Label size (desktop)",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "label_spacing",
+      "label": "Label spacing",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label color",
+      "default": "#121212"
+    },
+    {
+      "type": "header",
+      "content": "Category 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "category_1_enabled",
+      "label": "Enable category 1",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "category_1_label",
+      "label": "Label",
+      "default": "Dulces"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "collection",
+      "id": "category_1_collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "category_2_enabled",
+      "label": "Enable category 2",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "category_2_label",
+      "label": "Label",
+      "default": "Condimentos"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "collection",
+      "id": "category_2_collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "category_3_enabled",
+      "label": "Enable category 3",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "category_3_label",
+      "label": "Label",
+      "default": "Snacks"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "collection",
+      "id": "category_3_collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "category_4_enabled",
+      "label": "Enable category 4",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "category_4_label",
+      "label": "Label",
+      "default": "Atún"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "collection",
+      "id": "category_4_collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "category_5_enabled",
+      "label": "Enable category 5",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "category_5_label",
+      "label": "Label"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_5_image",
+      "label": "Image"
+    },
+    {
+      "type": "collection",
+      "id": "category_5_collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 6"
+    },
+    {
+      "type": "checkbox",
+      "id": "category_6_enabled",
+      "label": "Enable category 6",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "category_6_label",
+      "label": "Label"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_6_image",
+      "label": "Image"
+    },
+    {
+      "type": "collection",
+      "id": "category_6_collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 7"
+    },
+    {
+      "type": "checkbox",
+      "id": "category_7_enabled",
+      "label": "Enable category 7",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "category_7_label",
+      "label": "Label"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_7_image",
+      "label": "Image"
+    },
+    {
+      "type": "collection",
+      "id": "category_7_collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Category 8"
+    },
+    {
+      "type": "checkbox",
+      "id": "category_8_enabled",
+      "label": "Enable category 8",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "category_8_label",
+      "label": "Label"
+    },
+    {
+      "type": "image_picker",
+      "id": "category_8_image",
+      "label": "Image"
+    },
+    {
+      "type": "collection",
+      "id": "category_8_collection",
+      "label": "Collection"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category scroll"
+    }
+  ]
+}
+{% endschema %}
