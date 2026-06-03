@@ -1,0 +1,1103 @@
+{% doc %}
+  @prompt
+    Create a responsive header section for EcuaFolk, an Ecuadorian food store. DESKTOP behavior (769px and above): Show a full header with 3 columns: LEFT - hamburger menu icon and "ECUAFOLK" logo brand name in dark color. CENTER - horizontal navigation links in red: "Inicio", "Snacks", "Dulces", "Café", "Contacto". RIGHT - search icon, cart icon with red item count badge, and account profile icon. White background with a subtle bottom border. MOBILE behavior (768px and below): Hide all navigation and icons but show only the logo "ECUAFOLK" centered in the middle of a minimal white header bar so the brand is always visible on mobile. The sticky bottom nav bar handles all mobile navigation. The navigation links should connect to real Shopify collections and pages. Include theme editor settings to customize the nav link labels and URLs. Add detailed code comments explaining every CSS media query, Liquid tag, and layout rule so a developer can easily understand and modify the responsive behavior., add language options,    <section class="header__logo-background" style="background-image: url('{{ 'ecuatextlogo.png' | asset_url }}');">    on mobile needs to show this logo in the middle, make the logo on mobile bigger on height. Also bring back the burger menu with the categories. 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-ecuafolk-header-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    border-bottom: {{ block.settings.border_thickness }}px solid {{ block.settings.border_color }};
+    position: relative;
+    z-index: 100;
+  }
+
+  .ai-ecuafolk-header__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}px;
+    margin: 0 auto;
+    padding: {{ block.settings.vertical_padding }}px {{ block.settings.horizontal_padding }}px;
+  }
+
+  .ai-ecuafolk-header__grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .ai-ecuafolk-header__left-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: flex-start;
+  }
+
+  .ai-ecuafolk-header__hamburger-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: {{ block.settings.icon_color }};
+  }
+
+  .ai-ecuafolk-header__hamburger-icon-{{ ai_gen_id }} {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ai-ecuafolk-header__logo-{{ ai_gen_id }} {
+    font-size: {{ block.settings.logo_font_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.logo_color }};
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-ecuafolk-header__center-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+  }
+
+  .ai-ecuafolk-header__nav-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.nav_gap }}px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ai-ecuafolk-header__nav-link-{{ ai_gen_id }} {
+    color: {{ block.settings.nav_link_color }};
+    text-decoration: none;
+    font-size: {{ block.settings.nav_font_size }}px;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+  }
+
+  .ai-ecuafolk-header__nav-link-{{ ai_gen_id }}:hover {
+    opacity: 0.7;
+  }
+
+  .ai-ecuafolk-header__right-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: flex-end;
+  }
+
+  .ai-ecuafolk-header__icon-button-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: {{ block.settings.icon_color }};
+    position: relative;
+  }
+
+  .ai-ecuafolk-header__icon-{{ ai_gen_id }} {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ai-ecuafolk-header__cart-badge-{{ ai_gen_id }} {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: {{ block.settings.badge_color }};
+    color: {{ block.settings.badge_text_color }};
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+  }
+
+  .ai-ecuafolk-header__language-selector-{{ ai_gen_id }} {
+    position: relative;
+  }
+
+  .ai-ecuafolk-header__language-button-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: {{ block.settings.icon_color }};
+    font-size: {{ block.settings.nav_font_size }}px;
+    font-weight: 500;
+  }
+
+  .ai-ecuafolk-header__language-icon-{{ ai_gen_id }} {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ai-ecuafolk-header__language-dropdown-{{ ai_gen_id }} {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background-color: {{ block.settings.background_color }};
+    border: 1px solid {{ block.settings.border_color }};
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    z-index: 1000;
+  }
+
+  .ai-ecuafolk-header__language-dropdown-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .ai-ecuafolk-header__language-option-{{ ai_gen_id }} {
+    display: block;
+    padding: 10px 16px;
+    color: {{ block.settings.logo_color }};
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .ai-ecuafolk-header__language-option-{{ ai_gen_id }}:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .ai-ecuafolk-header__language-option-{{ ai_gen_id }}.active {
+    background-color: rgba(220, 20, 60, 0.1);
+    color: {{ block.settings.nav_link_color }};
+    font-weight: 600;
+  }
+
+  .ai-ecuafolk-header__logo-image-wrapper-{{ ai_gen_id }} {
+    display: block;
+    line-height: 0;
+  }
+
+  .ai-ecuafolk-header__logo-image-{{ ai_gen_id }} {
+    height: {{ block.settings.logo_image_height }}px;
+    width: auto;
+    display: block;
+  }
+
+  .ai-ecuafolk-header__mobile-container-{{ ai_gen_id }} {
+    display: none;
+  }
+
+  .ai-ecuafolk-header__mobile-grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ai-ecuafolk-header__mobile-left-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+  }
+
+  .ai-ecuafolk-header__mobile-center-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ai-ecuafolk-header__mobile-right-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+  }
+
+  .ai-ecuafolk-header__logo-mobile-image-{{ ai_gen_id }} {
+    height: {{ block.settings.mobile_logo_height }}px;
+    width: auto;
+    display: block;
+  }
+
+  .ai-ecuafolk-header__logo-mobile-text-{{ ai_gen_id }} {
+    display: block;
+    font-size: {{ block.settings.logo_font_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.logo_color }};
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .ai-ecuafolk-header__mobile-menu-{{ ai_gen_id }} {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 80%;
+    max-width: 320px;
+    height: 100vh;
+    background-color: {{ block.settings.background_color }};
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  .ai-ecuafolk-header__mobile-menu-{{ ai_gen_id }}.active {
+    left: 0;
+  }
+
+  .ai-ecuafolk-header__mobile-menu-header-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-ecuafolk-header__mobile-menu-title-{{ ai_gen_id }} {
+    font-size: 18px;
+    font-weight: 700;
+    color: {{ block.settings.logo_color }};
+    margin: 0;
+  }
+
+  .ai-ecuafolk-header__mobile-menu-close-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: {{ block.settings.icon_color }};
+  }
+
+  .ai-ecuafolk-header__mobile-nav-{{ ai_gen_id }} {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ai-ecuafolk-header__mobile-nav-item-{{ ai_gen_id }} {
+    border-bottom: 1px solid {{ block.settings.border_color }};
+  }
+
+  .ai-ecuafolk-header__mobile-nav-link-{{ ai_gen_id }} {
+    display: block;
+    padding: 16px 20px;
+    color: {{ block.settings.logo_color }};
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .ai-ecuafolk-header__mobile-nav-link-{{ ai_gen_id }}:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .ai-ecuafolk-header__mobile-overlay-{{ ai_gen_id }} {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 999;
+  }
+
+  .ai-ecuafolk-header__mobile-overlay-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-ecuafolk-header__grid-{{ ai_gen_id }} {
+      display: none;
+    }
+
+    .ai-ecuafolk-header__mobile-container-{{ ai_gen_id }} {
+      display: block;
+    }
+  }
+
+  @media screen and (min-width: 769px) {
+    .ai-ecuafolk-header__mobile-container-{{ ai_gen_id }} {
+      display: none;
+    }
+  }
+{% endstyle %}
+
+<ecuafolk-header-{{ ai_gen_id }} class="ai-ecuafolk-header-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-ecuafolk-header__container-{{ ai_gen_id }}">
+    <div class="ai-ecuafolk-header__grid-{{ ai_gen_id }}">
+      <div class="ai-ecuafolk-header__left-{{ ai_gen_id }}">
+        <button
+          class="ai-ecuafolk-header__hamburger-{{ ai_gen_id }}"
+          aria-label="Open menu"
+          aria-expanded="false"
+        >
+          <svg
+            class="ai-ecuafolk-header__hamburger-icon-{{ ai_gen_id }}"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        {% if block.settings.logo_image != blank %}
+          <a href="/" class="ai-ecuafolk-header__logo-image-wrapper-{{ ai_gen_id }}">
+            <img
+              src="{{ block.settings.logo_image | image_url: height: block.settings.logo_image_height }}"
+              alt="{{ shop.name }}"
+              class="ai-ecuafolk-header__logo-image-{{ ai_gen_id }}"
+              width="auto"
+              height="{{ block.settings.logo_image_height }}"
+              loading="eager"
+            >
+          </a>
+        {% else %}
+          <a href="/" class="ai-ecuafolk-header__logo-{{ ai_gen_id }}">
+            {{ block.settings.logo_text }}
+          </a>
+        {% endif %}
+      </div>
+
+      <nav class="ai-ecuafolk-header__center-{{ ai_gen_id }}" aria-label="Main navigation">
+        <ul class="ai-ecuafolk-header__nav-{{ ai_gen_id }}">
+          {% if block.settings.nav_link_1_label != blank %}
+            <li>
+              <a
+                href="{{ block.settings.nav_link_1_url }}"
+                class="ai-ecuafolk-header__nav-link-{{ ai_gen_id }}"
+              >
+                {{ block.settings.nav_link_1_label }}
+              </a>
+            </li>
+          {% endif %}
+
+          {% if block.settings.nav_link_2_label != blank %}
+            <li>
+              <a
+                href="{{ block.settings.nav_link_2_url }}"
+                class="ai-ecuafolk-header__nav-link-{{ ai_gen_id }}"
+              >
+                {{ block.settings.nav_link_2_label }}
+              </a>
+            </li>
+          {% endif %}
+
+          {% if block.settings.nav_link_3_label != blank %}
+            <li>
+              <a
+                href="{{ block.settings.nav_link_3_url }}"
+                class="ai-ecuafolk-header__nav-link-{{ ai_gen_id }}"
+              >
+                {{ block.settings.nav_link_3_label }}
+              </a>
+            </li>
+          {% endif %}
+
+          {% if block.settings.nav_link_4_label != blank %}
+            <li>
+              <a
+                href="{{ block.settings.nav_link_4_url }}"
+                class="ai-ecuafolk-header__nav-link-{{ ai_gen_id }}"
+              >
+                {{ block.settings.nav_link_4_label }}
+              </a>
+            </li>
+          {% endif %}
+
+          {% if block.settings.nav_link_5_label != blank %}
+            <li>
+              <a
+                href="{{ block.settings.nav_link_5_url }}"
+                class="ai-ecuafolk-header__nav-link-{{ ai_gen_id }}"
+              >
+                {{ block.settings.nav_link_5_label }}
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+
+      <div class="ai-ecuafolk-header__right-{{ ai_gen_id }}">
+        {% if block.settings.show_language_selector %}
+          <div class="ai-ecuafolk-header__language-selector-{{ ai_gen_id }}">
+            <button
+              class="ai-ecuafolk-header__language-button-{{ ai_gen_id }}"
+              aria-label="Select language"
+              aria-expanded="false"
+              data-language-toggle
+            >
+              <svg
+                class="ai-ecuafolk-header__language-icon-{{ ai_gen_id }}"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              <span>{{ block.settings.current_language_code }}</span>
+            </button>
+
+            <div class="ai-ecuafolk-header__language-dropdown-{{ ai_gen_id }}" data-language-dropdown>
+              {% if block.settings.language_1_code != blank %}
+                <button
+                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if block.settings.current_language_code == block.settings.language_1_code %}active{% endif %}"
+                  data-language="{{ block.settings.language_1_code }}"
+                >
+                  {{ block.settings.language_1_name }}
+                </button>
+              {% endif %}
+
+              {% if block.settings.language_2_code != blank %}
+                <button
+                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if block.settings.current_language_code == block.settings.language_2_code %}active{% endif %}"
+                  data-language="{{ block.settings.language_2_code }}"
+                >
+                  {{ block.settings.language_2_name }}
+                </button>
+              {% endif %}
+
+              {% if block.settings.language_3_code != blank %}
+                <button
+                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if block.settings.current_language_code == block.settings.language_3_code %}active{% endif %}"
+                  data-language="{{ block.settings.language_3_code }}"
+                >
+                  {{ block.settings.language_3_name }}
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
+        <button
+          class="ai-ecuafolk-header__icon-button-{{ ai_gen_id }} search-trigger"
+          aria-label="Search"
+        >
+          <svg
+            class="ai-ecuafolk-header__icon-{{ ai_gen_id }}"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+
+        <a
+          href="/cart"
+          class="ai-ecuafolk-header__icon-button-{{ ai_gen_id }}"
+          aria-label="Cart with {{ cart.item_count }} items"
+        >
+          <svg
+            class="ai-ecuafolk-header__icon-{{ ai_gen_id }}"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          {% if cart.item_count > 0 %}
+            <span class="ai-ecuafolk-header__cart-badge-{{ ai_gen_id }}">
+              {{ cart.item_count }}
+            </span>
+          {% endif %}
+        </a>
+
+        <a
+          href="/account"
+          class="ai-ecuafolk-header__icon-button-{{ ai_gen_id }}"
+          aria-label="Account"
+        >
+          <svg
+            class="ai-ecuafolk-header__icon-{{ ai_gen_id }}"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="ai-ecuafolk-header__mobile-container-{{ ai_gen_id }}">
+      <div class="ai-ecuafolk-header__mobile-grid-{{ ai_gen_id }}">
+        <div class="ai-ecuafolk-header__mobile-left-{{ ai_gen_id }}">
+          <button
+            class="ai-ecuafolk-header__hamburger-{{ ai_gen_id }}"
+            aria-label="Open menu"
+            aria-expanded="false"
+            data-mobile-menu-toggle
+          >
+            <svg
+              class="ai-ecuafolk-header__hamburger-icon-{{ ai_gen_id }}"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="ai-ecuafolk-header__mobile-center-{{ ai_gen_id }}">
+          {% if block.settings.mobile_logo_image != blank %}
+            <a href="/">
+              <img
+                src="{{ block.settings.mobile_logo_image | image_url: height: block.settings.mobile_logo_height }}"
+                alt="{{ shop.name }}"
+                class="ai-ecuafolk-header__logo-mobile-image-{{ ai_gen_id }}"
+                width="auto"
+                height="{{ block.settings.mobile_logo_height }}"
+                loading="eager"
+              >
+            </a>
+          {% elsif block.settings.logo_image != blank %}
+            <a href="/">
+              <img
+                src="{{ block.settings.logo_image | image_url: height: block.settings.mobile_logo_height }}"
+                alt="{{ shop.name }}"
+                class="ai-ecuafolk-header__logo-mobile-image-{{ ai_gen_id }}"
+                width="auto"
+                height="{{ block.settings.mobile_logo_height }}"
+                loading="eager"
+              >
+            </a>
+          {% else %}
+            <a href="/" class="ai-ecuafolk-header__logo-mobile-text-{{ ai_gen_id }}">
+              {{ block.settings.logo_text }}
+            </a>
+          {% endif %}
+        </div>
+
+        <div class="ai-ecuafolk-header__mobile-right-{{ ai_gen_id }}">
+          <a
+            href="/cart"
+            class="ai-ecuafolk-header__icon-button-{{ ai_gen_id }}"
+            aria-label="Cart with {{ cart.item_count }} items"
+          >
+            <svg
+              class="ai-ecuafolk-header__icon-{{ ai_gen_id }}"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            {% if cart.item_count > 0 %}
+              <span class="ai-ecuafolk-header__cart-badge-{{ ai_gen_id }}">
+                {{ cart.item_count }}
+              </span>
+            {% endif %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ai-ecuafolk-header__mobile-overlay-{{ ai_gen_id }}" data-mobile-overlay></div>
+
+  <div class="ai-ecuafolk-header__mobile-menu-{{ ai_gen_id }}" data-mobile-menu>
+    <div class="ai-ecuafolk-header__mobile-menu-header-{{ ai_gen_id }}">
+      <h2 class="ai-ecuafolk-header__mobile-menu-title-{{ ai_gen_id }}">Menu</h2>
+      <button
+        class="ai-ecuafolk-header__mobile-menu-close-{{ ai_gen_id }}"
+        aria-label="Close menu"
+        data-mobile-menu-close
+      >
+        <svg
+          class="ai-ecuafolk-header__hamburger-icon-{{ ai_gen_id }}"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <nav aria-label="Mobile navigation">
+      <ul class="ai-ecuafolk-header__mobile-nav-{{ ai_gen_id }}">
+        {% if block.settings.nav_link_1_label != blank %}
+          <li class="ai-ecuafolk-header__mobile-nav-item-{{ ai_gen_id }}">
+            <a
+              href="{{ block.settings.nav_link_1_url }}"
+              class="ai-ecuafolk-header__mobile-nav-link-{{ ai_gen_id }}"
+            >
+              {{ block.settings.nav_link_1_label }}
+            </a>
+          </li>
+        {% endif %}
+
+        {% if block.settings.nav_link_2_label != blank %}
+          <li class="ai-ecuafolk-header__mobile-nav-item-{{ ai_gen_id }}">
+            <a
+              href="{{ block.settings.nav_link_2_url }}"
+              class="ai-ecuafolk-header__mobile-nav-link-{{ ai_gen_id }}"
+            >
+              {{ block.settings.nav_link_2_label }}
+            </a>
+          </li>
+        {% endif %}
+
+        {% if block.settings.nav_link_3_label != blank %}
+          <li class="ai-ecuafolk-header__mobile-nav-item-{{ ai_gen_id }}">
+            <a
+              href="{{ block.settings.nav_link_3_url }}"
+              class="ai-ecuafolk-header__mobile-nav-link-{{ ai_gen_id }}"
+            >
+              {{ block.settings.nav_link_3_label }}
+            </a>
+          </li>
+        {% endif %}
+
+        {% if block.settings.nav_link_4_label != blank %}
+          <li class="ai-ecuafolk-header__mobile-nav-item-{{ ai_gen_id }}">
+            <a
+              href="{{ block.settings.nav_link_4_url }}"
+              class="ai-ecuafolk-header__mobile-nav-link-{{ ai_gen_id }}"
+            >
+              {{ block.settings.nav_link_4_label }}
+            </a>
+          </li>
+        {% endif %}
+
+        {% if block.settings.nav_link_5_label != blank %}
+          <li class="ai-ecuafolk-header__mobile-nav-item-{{ ai_gen_id }}">
+            <a
+              href="{{ block.settings.nav_link_5_url }}"
+              class="ai-ecuafolk-header__mobile-nav-link-{{ ai_gen_id }}"
+            >
+              {{ block.settings.nav_link_5_label }}
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</ecuafolk-header-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class EcuafolkHeader{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.hamburger = this.querySelector('.ai-ecuafolk-header__hamburger-{{ ai_gen_id }}');
+        this.languageToggle = this.querySelector('[data-language-toggle]');
+        this.languageDropdown = this.querySelector('[data-language-dropdown]');
+        this.languageOptions = this.querySelectorAll('[data-language]');
+        this.mobileMenuToggle = this.querySelector('[data-mobile-menu-toggle]');
+        this.mobileMenu = this.querySelector('[data-mobile-menu]');
+        this.mobileMenuClose = this.querySelector('[data-mobile-menu-close]');
+        this.mobileOverlay = this.querySelector('[data-mobile-overlay]');
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        if (this.hamburger) {
+          this.hamburger.addEventListener('click', () => {
+            const isExpanded = this.hamburger.getAttribute('aria-expanded') === 'true';
+            this.hamburger.setAttribute('aria-expanded', !isExpanded);
+          });
+        }
+
+        if (this.languageToggle && this.languageDropdown) {
+          this.languageToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isExpanded = this.languageToggle.getAttribute('aria-expanded') === 'true';
+            this.languageToggle.setAttribute('aria-expanded', !isExpanded);
+            this.languageDropdown.classList.toggle('active');
+          });
+
+          document.addEventListener('click', (e) => {
+            if (!this.contains(e.target)) {
+              this.languageToggle.setAttribute('aria-expanded', 'false');
+              this.languageDropdown.classList.remove('active');
+            }
+          });
+        }
+
+        this.languageOptions.forEach(option => {
+          option.addEventListener('click', () => {
+            const languageCode = option.getAttribute('data-language');
+            this.languageOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+            
+            const languageText = this.languageToggle.querySelector('span');
+            if (languageText) {
+              languageText.textContent = languageCode;
+            }
+            
+            this.languageToggle.setAttribute('aria-expanded', 'false');
+            this.languageDropdown.classList.remove('active');
+          });
+        });
+
+        if (this.mobileMenuToggle && this.mobileMenu && this.mobileOverlay) {
+          this.mobileMenuToggle.addEventListener('click', () => {
+            this.openMobileMenu();
+          });
+
+          this.mobileMenuClose.addEventListener('click', () => {
+            this.closeMobileMenu();
+          });
+
+          this.mobileOverlay.addEventListener('click', () => {
+            this.closeMobileMenu();
+          });
+        }
+      }
+
+      openMobileMenu() {
+        this.mobileMenu.classList.add('active');
+        this.mobileOverlay.classList.add('active');
+        this.mobileMenuToggle.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+      }
+
+      closeMobileMenu() {
+        this.mobileMenu.classList.remove('active');
+        this.mobileOverlay.classList.remove('active');
+        this.mobileMenuToggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+      }
+    }
+
+    customElements.define('ecuafolk-header-{{ ai_gen_id }}', EcuafolkHeader{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "EcuaFolk header",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Logo image"
+    },
+    {
+      "type": "range",
+      "id": "logo_image_height",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Logo image height",
+      "default": 40
+    },
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Logo text",
+      "default": "ECUAFOLK"
+    },
+    {
+      "type": "color",
+      "id": "logo_color",
+      "label": "Logo color",
+      "default": "#121212"
+    },
+    {
+      "type": "range",
+      "id": "logo_font_size",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Logo font size",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Mobile logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_logo_image",
+      "label": "Mobile logo image"
+    },
+    {
+      "type": "range",
+      "id": "mobile_logo_height",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Mobile logo height",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Navigation links"
+    },
+    {
+      "type": "text",
+      "id": "nav_link_1_label",
+      "label": "Link 1 label",
+      "default": "Inicio"
+    },
+    {
+      "type": "url",
+      "id": "nav_link_1_url",
+      "label": "Link 1 URL"
+    },
+    {
+      "type": "text",
+      "id": "nav_link_2_label",
+      "label": "Link 2 label",
+      "default": "Snacks"
+    },
+    {
+      "type": "url",
+      "id": "nav_link_2_url",
+      "label": "Link 2 URL"
+    },
+    {
+      "type": "text",
+      "id": "nav_link_3_label",
+      "label": "Link 3 label",
+      "default": "Dulces"
+    },
+    {
+      "type": "url",
+      "id": "nav_link_3_url",
+      "label": "Link 3 URL"
+    },
+    {
+      "type": "text",
+      "id": "nav_link_4_label",
+      "label": "Link 4 label",
+      "default": "Café"
+    },
+    {
+      "type": "url",
+      "id": "nav_link_4_url",
+      "label": "Link 4 URL"
+    },
+    {
+      "type": "text",
+      "id": "nav_link_5_label",
+      "label": "Link 5 label",
+      "default": "Contacto"
+    },
+    {
+      "type": "url",
+      "id": "nav_link_5_url",
+      "label": "Link 5 URL"
+    },
+    {
+      "type": "color",
+      "id": "nav_link_color",
+      "label": "Link color",
+      "default": "#dc143c"
+    },
+    {
+      "type": "range",
+      "id": "nav_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Link font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "nav_gap",
+      "min": 16,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Link spacing",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Language selector"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_language_selector",
+      "label": "Show language selector",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "current_language_code",
+      "label": "Current language code",
+      "default": "EN"
+    },
+    {
+      "type": "text",
+      "id": "language_1_code",
+      "label": "Language 1 code",
+      "default": "EN"
+    },
+    {
+      "type": "text",
+      "id": "language_1_name",
+      "label": "Language 1 name",
+      "default": "English"
+    },
+    {
+      "type": "text",
+      "id": "language_2_code",
+      "label": "Language 2 code",
+      "default": "ES"
+    },
+    {
+      "type": "text",
+      "id": "language_2_name",
+      "label": "Language 2 name",
+      "default": "Español"
+    },
+    {
+      "type": "text",
+      "id": "language_3_code",
+      "label": "Language 3 code"
+    },
+    {
+      "type": "text",
+      "id": "language_3_name",
+      "label": "Language 3 name"
+    },
+    {
+      "type": "header",
+      "content": "Icons"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Cart badge color",
+      "default": "#dc143c"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Cart badge text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Header style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border thickness",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "range",
+      "id": "vertical_padding",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "label": "Vertical padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "horizontal_padding",
+      "min": 16,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Horizontal padding",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 1000,
+      "max": 1600,
+      "step": 100,
+      "unit": "px",
+      "label": "Max width",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    }
+  ],
+  "presets": [
+    {
+      "name": "EcuaFolk header"
+    }
+  ]
+}
+{% endschema %}

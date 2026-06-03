@@ -1,0 +1,876 @@
+{% doc %}
+  @prompt
+    Create a mobile-first footer section for EcuaFolk, an Ecuadorian food store. The footer has two parts: 1) An Instagram section at the top with a heading "Síguenos en Instagram", a red subtext "@EcuaFolk", a 3x2 grid of Instagram post images (6 images total), and a large red button "SEGUIR @ECUAFOLK" that links to the Instagram profile. 2) A clean footer below with a light gray background, the brand name "EcuaFolk" in red centered at the top, navigation links on two rows (Store Info, Shipping Policy on first row, Contact Us, Privacy on second row), and copyright text "© 2024 EcuaFolk. Hecho con orgullo en Ecuador." centered at the bottom. Also include a sticky mobile bottom navigation bar with 4 icons: Explore (store icon), Search (magnifying glass), Cart (bag with item count badge), and Profile (person icon) — this should be fixed to the bottom of the screen on mobile only. Include theme editor settings for the Instagram handle, button link, footer links, and copyright text. Add detailed code comments throughout explaining every Liquid tag, CSS class, and schema setting so a developer can understand and modify the code easily., ADD THE payment methods like the current footer , fix it is showing errors, agrega el boton the follow en shop tambien
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-ecuafolk-footer-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding-bottom: 70px;
+  }
+
+  .ai-instagram-section-{{ ai_gen_id }} {
+    background-color: {{ block.settings.instagram_bg_color }};
+    padding: {{ block.settings.instagram_padding }}px 20px;
+    text-align: center;
+  }
+
+  .ai-instagram-heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.instagram_heading_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.instagram_heading_color }};
+    margin: 0 0 8px 0;
+  }
+
+  .ai-instagram-handle-{{ ai_gen_id }} {
+    font-size: {{ block.settings.instagram_handle_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.instagram_handle_color }};
+    margin: 0 0 24px 0;
+  }
+
+  .ai-instagram-grid-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: {{ block.settings.instagram_grid_gap }}px;
+    margin-bottom: 24px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ai-instagram-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    overflow: hidden;
+    background-color: #f4f4f4;
+    border-radius: {{ block.settings.instagram_image_radius }}px;
+  }
+
+  .ai-instagram-image-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-instagram-placeholder-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-instagram-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-instagram-button-{{ ai_gen_id }} {
+    display: inline-block;
+    background-color: {{ block.settings.instagram_btn_bg }};
+    color: {{ block.settings.instagram_btn_text }};
+    padding: 16px 40px;
+    font-size: {{ block.settings.instagram_btn_size }}px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: {{ block.settings.instagram_btn_radius }}px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-instagram-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.instagram_btn_hover_bg }};
+    color: {{ block.settings.instagram_btn_hover_text }};
+  }
+
+  .ai-footer-main-{{ ai_gen_id }} {
+    background-color: {{ block.settings.footer_bg_color }};
+    padding: {{ block.settings.footer_padding }}px 20px;
+    text-align: center;
+  }
+
+  .ai-footer-brand-{{ ai_gen_id }} {
+    font-size: {{ block.settings.footer_brand_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.footer_brand_color }};
+    margin: 0 0 24px 0;
+  }
+
+  .ai-footer-nav-{{ ai_gen_id }} {
+    margin-bottom: 24px;
+  }
+
+  .ai-footer-nav-row-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 12px;
+  }
+
+  .ai-footer-nav-row-{{ ai_gen_id }}:last-child {
+    margin-bottom: 0;
+  }
+
+  .ai-footer-link-{{ ai_gen_id }} {
+    font-size: {{ block.settings.footer_link_size }}px;
+    color: {{ block.settings.footer_link_color }};
+    text-decoration: none;
+  }
+
+  .ai-footer-link-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.footer_link_hover_color }};
+    text-decoration: underline;
+  }
+
+  .ai-shop-button-{{ ai_gen_id }} {
+    display: inline-block;
+    background-color: {{ block.settings.shop_btn_bg }};
+    color: {{ block.settings.shop_btn_text }};
+    padding: 14px 32px;
+    font-size: {{ block.settings.shop_btn_size }}px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: {{ block.settings.shop_btn_radius }}px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+  }
+
+  .ai-shop-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.shop_btn_hover_bg }};
+    color: {{ block.settings.shop_btn_hover_text }};
+  }
+
+  .ai-payment-methods-{{ ai_gen_id }} {
+    margin: 24px 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ai-payment-methods-{{ ai_gen_id }} svg {
+    height: {{ block.settings.payment_icon_height }}px;
+    width: auto;
+    opacity: {{ block.settings.payment_icon_opacity }};
+  }
+
+  .ai-footer-copyright-{{ ai_gen_id }} {
+    font-size: {{ block.settings.footer_copyright_size }}px;
+    color: {{ block.settings.footer_copyright_color }};
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .ai-mobile-nav-{{ ai_gen_id }} {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: {{ block.settings.mobile_nav_bg }};
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 0;
+    height: 70px;
+  }
+
+  .ai-mobile-nav-item-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: {{ block.settings.mobile_nav_icon_color }};
+    flex: 1;
+    position: relative;
+  }
+
+  .ai-mobile-nav-item-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.mobile_nav_icon_hover_color }};
+  }
+
+  .ai-mobile-nav-icon-{{ ai_gen_id }} {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 4px;
+  }
+
+  .ai-mobile-nav-label-{{ ai_gen_id }} {
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .ai-mobile-nav-badge-{{ ai_gen_id }} {
+    position: absolute;
+    top: -4px;
+    right: calc(50% - 20px);
+    background-color: {{ block.settings.mobile_nav_badge_bg }};
+    color: {{ block.settings.mobile_nav_badge_text }};
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-mobile-nav-{{ ai_gen_id }} {
+      display: none;
+    }
+
+    .ai-ecuafolk-footer-{{ ai_gen_id }} {
+      padding-bottom: 0;
+    }
+
+    .ai-instagram-section-{{ ai_gen_id }} {
+      padding: {{ block.settings.instagram_padding | times: 1.5 }}px 40px;
+    }
+
+    .ai-footer-main-{{ ai_gen_id }} {
+      padding: {{ block.settings.footer_padding | times: 1.5 }}px 40px;
+    }
+
+    .ai-instagram-grid-{{ ai_gen_id }} {
+      max-width: 800px;
+    }
+  }
+{% endstyle %}
+
+<ecuafolk-footer-{{ ai_gen_id }} class="ai-ecuafolk-footer-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-instagram-section-{{ ai_gen_id }}">
+    <h2 class="ai-instagram-heading-{{ ai_gen_id }}">{{ block.settings.instagram_heading }}</h2>
+    <p class="ai-instagram-handle-{{ ai_gen_id }}">{{ block.settings.instagram_handle }}</p>
+
+    <div class="ai-instagram-grid-{{ ai_gen_id }}">
+      {% for i in (1..6) %}
+        {% assign image_key = 'instagram_image_' | append: i %}
+        {% assign image = block.settings[image_key] %}
+
+        <div class="ai-instagram-image-wrapper-{{ ai_gen_id }}">
+          {% if image %}
+            <img
+              src="{{ image | image_url: width: 400 }}"
+              alt="{{ image.alt | escape }}"
+              loading="lazy"
+              width="400"
+              height="400"
+              class="ai-instagram-image-{{ ai_gen_id }}"
+            >
+          {% else %}
+            <div class="ai-instagram-placeholder-{{ ai_gen_id }}">
+              {{ 'image' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <a
+      href="{{ block.settings.instagram_btn_link }}"
+      class="ai-instagram-button-{{ ai_gen_id }}"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {{ block.settings.instagram_btn_label }}
+    </a>
+  </div>
+
+  <footer class="ai-footer-main-{{ ai_gen_id }}">
+    <h3 class="ai-footer-brand-{{ ai_gen_id }}">{{ block.settings.footer_brand_name }}</h3>
+
+    {% if block.settings.show_shop_button %}
+      <a
+        href="{{ block.settings.shop_btn_link }}"
+        class="ai-shop-button-{{ ai_gen_id }}"
+      >
+        {{ block.settings.shop_btn_label }}
+      </a>
+    {% endif %}
+
+    <nav class="ai-footer-nav-{{ ai_gen_id }}">
+      <div class="ai-footer-nav-row-{{ ai_gen_id }}">
+        <a href="{{ block.settings.footer_link_1_url }}" class="ai-footer-link-{{ ai_gen_id }}">
+          {{ block.settings.footer_link_1_text }}
+        </a>
+        <a href="{{ block.settings.footer_link_2_url }}" class="ai-footer-link-{{ ai_gen_id }}">
+          {{ block.settings.footer_link_2_text }}
+        </a>
+      </div>
+      <div class="ai-footer-nav-row-{{ ai_gen_id }}">
+        <a href="{{ block.settings.footer_link_3_url }}" class="ai-footer-link-{{ ai_gen_id }}">
+          {{ block.settings.footer_link_3_text }}
+        </a>
+        <a href="{{ block.settings.footer_link_4_url }}" class="ai-footer-link-{{ ai_gen_id }}">
+          {{ block.settings.footer_link_4_text }}
+        </a>
+      </div>
+    </nav>
+
+    {% if block.settings.show_payment_icons %}
+      <div class="ai-payment-methods-{{ ai_gen_id }}">
+        {% for type in shop.enabled_payment_types %}
+          {{ type | payment_type_svg_tag }}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <p class="ai-footer-copyright-{{ ai_gen_id }}">{{ block.settings.footer_copyright }}</p>
+  </footer>
+
+  <nav class="ai-mobile-nav-{{ ai_gen_id }}">
+    <a href="{{ routes.root_url }}" class="ai-mobile-nav-item-{{ ai_gen_id }}">
+      <svg class="ai-mobile-nav-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+      <span class="ai-mobile-nav-label-{{ ai_gen_id }}">{{ block.settings.mobile_nav_explore_label }}</span>
+    </a>
+
+    <button type="button" class="ai-mobile-nav-item-{{ ai_gen_id }} search-trigger" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;">
+      <svg class="ai-mobile-nav-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <span class="ai-mobile-nav-label-{{ ai_gen_id }}">{{ block.settings.mobile_nav_search_label }}</span>
+    </button>
+
+    <a href="{{ routes.cart_url }}" class="ai-mobile-nav-item-{{ ai_gen_id }}">
+      <svg class="ai-mobile-nav-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+      {% if cart.item_count > 0 %}
+        <span class="ai-mobile-nav-badge-{{ ai_gen_id }}">{{ cart.item_count }}</span>
+      {% endif %}
+      <span class="ai-mobile-nav-label-{{ ai_gen_id }}">{{ block.settings.mobile_nav_cart_label }}</span>
+    </a>
+
+    <a href="{{ routes.account_url }}" class="ai-mobile-nav-item-{{ ai_gen_id }}">
+      <svg class="ai-mobile-nav-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+      <span class="ai-mobile-nav-label-{{ ai_gen_id }}">{{ block.settings.mobile_nav_profile_label }}</span>
+    </a>
+  </nav>
+</ecuafolk-footer-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class EcuafolkFooter{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.setupAccessibility();
+      }
+
+      setupAccessibility() {
+        const mobileNavItems = this.querySelectorAll('.ai-mobile-nav-item-{{ ai_gen_id }}');
+        mobileNavItems.forEach(item => {
+          item.setAttribute('role', 'button');
+          item.setAttribute('tabindex', '0');
+        });
+      }
+    }
+
+    customElements.define('ecuafolk-footer-{{ ai_gen_id }}', EcuafolkFooter{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "EcuaFolk footer",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Instagram section"
+    },
+    {
+      "type": "text",
+      "id": "instagram_heading",
+      "label": "Heading",
+      "default": "Síguenos en Instagram"
+    },
+    {
+      "type": "text",
+      "id": "instagram_handle",
+      "label": "Instagram handle",
+      "default": "@EcuaFolk"
+    },
+    {
+      "type": "image_picker",
+      "id": "instagram_image_1",
+      "label": "Instagram image 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "instagram_image_2",
+      "label": "Instagram image 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "instagram_image_3",
+      "label": "Instagram image 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "instagram_image_4",
+      "label": "Instagram image 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "instagram_image_5",
+      "label": "Instagram image 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "instagram_image_6",
+      "label": "Instagram image 6"
+    },
+    {
+      "type": "text",
+      "id": "instagram_btn_label",
+      "label": "Button text",
+      "default": "SEGUIR @ECUAFOLK"
+    },
+    {
+      "type": "url",
+      "id": "instagram_btn_link",
+      "label": "Button link"
+    },
+    {
+      "type": "color",
+      "id": "instagram_bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "instagram_heading_color",
+      "label": "Heading color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "instagram_handle_color",
+      "label": "Handle color",
+      "default": "#dc143c"
+    },
+    {
+      "type": "color",
+      "id": "instagram_btn_bg",
+      "label": "Button background",
+      "default": "#dc143c"
+    },
+    {
+      "type": "color",
+      "id": "instagram_btn_text",
+      "label": "Button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "instagram_btn_hover_bg",
+      "label": "Button hover background",
+      "default": "#b01030"
+    },
+    {
+      "type": "color",
+      "id": "instagram_btn_hover_text",
+      "label": "Button hover text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "instagram_heading_size",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "instagram_handle_size",
+      "min": 12,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Handle size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "instagram_btn_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button text size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "instagram_grid_gap",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Grid gap",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "instagram_image_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "instagram_btn_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Button border radius",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "instagram_padding",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Footer section"
+    },
+    {
+      "type": "text",
+      "id": "footer_brand_name",
+      "label": "Brand name",
+      "default": "EcuaFolk"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shop_button",
+      "label": "Show shop button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "shop_btn_label",
+      "label": "Shop button text",
+      "default": "FOLLOW THE SHOP"
+    },
+    {
+      "type": "url",
+      "id": "shop_btn_link",
+      "label": "Shop button link"
+    },
+    {
+      "type": "color",
+      "id": "shop_btn_bg",
+      "label": "Shop button background",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "shop_btn_text",
+      "label": "Shop button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "shop_btn_hover_bg",
+      "label": "Shop button hover background",
+      "default": "#dc143c"
+    },
+    {
+      "type": "color",
+      "id": "shop_btn_hover_text",
+      "label": "Shop button hover text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "shop_btn_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Shop button text size",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "shop_btn_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Shop button border radius",
+      "default": 0
+    },
+    {
+      "type": "text",
+      "id": "footer_link_1_text",
+      "label": "Link 1 text",
+      "default": "Store Info"
+    },
+    {
+      "type": "url",
+      "id": "footer_link_1_url",
+      "label": "Link 1 URL"
+    },
+    {
+      "type": "text",
+      "id": "footer_link_2_text",
+      "label": "Link 2 text",
+      "default": "Shipping Policy"
+    },
+    {
+      "type": "url",
+      "id": "footer_link_2_url",
+      "label": "Link 2 URL"
+    },
+    {
+      "type": "text",
+      "id": "footer_link_3_text",
+      "label": "Link 3 text",
+      "default": "Contact Us"
+    },
+    {
+      "type": "url",
+      "id": "footer_link_3_url",
+      "label": "Link 3 URL"
+    },
+    {
+      "type": "text",
+      "id": "footer_link_4_text",
+      "label": "Link 4 text",
+      "default": "Privacy"
+    },
+    {
+      "type": "url",
+      "id": "footer_link_4_url",
+      "label": "Link 4 URL"
+    },
+    {
+      "type": "text",
+      "id": "footer_copyright",
+      "label": "Copyright text",
+      "default": "© 2024 EcuaFolk. Hecho con orgullo en Ecuador."
+    },
+    {
+      "type": "color",
+      "id": "footer_bg_color",
+      "label": "Background color",
+      "default": "#f3f3f3"
+    },
+    {
+      "type": "color",
+      "id": "footer_brand_color",
+      "label": "Brand name color",
+      "default": "#dc143c"
+    },
+    {
+      "type": "color",
+      "id": "footer_link_color",
+      "label": "Link color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "footer_link_hover_color",
+      "label": "Link hover color",
+      "default": "#dc143c"
+    },
+    {
+      "type": "color",
+      "id": "footer_copyright_color",
+      "label": "Copyright text color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "footer_brand_size",
+      "min": 18,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "label": "Brand name size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "footer_link_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Link size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "footer_copyright_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Copyright text size",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "footer_padding",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Payment methods"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "label": "Show payment icons",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "payment_icon_height",
+      "min": 20,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Icon height",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "payment_icon_opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "label": "Icon opacity",
+      "default": 0.7
+    },
+    {
+      "type": "header",
+      "content": "Mobile navigation"
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_explore_label",
+      "label": "Explore label",
+      "default": "Explore"
+    },
+    {
+      "type": "url",
+      "id": "mobile_nav_explore_url",
+      "label": "Explore URL"
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_search_label",
+      "label": "Search label",
+      "default": "Search"
+    },
+    {
+      "type": "url",
+      "id": "mobile_nav_search_url",
+      "label": "Search URL"
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_cart_label",
+      "label": "Cart label",
+      "default": "Cart"
+    },
+    {
+      "type": "url",
+      "id": "mobile_nav_cart_url",
+      "label": "Cart URL"
+    },
+    {
+      "type": "text",
+      "id": "mobile_nav_profile_label",
+      "label": "Profile label",
+      "default": "Profile"
+    },
+    {
+      "type": "url",
+      "id": "mobile_nav_profile_url",
+      "label": "Profile URL"
+    },
+    {
+      "type": "color",
+      "id": "mobile_nav_bg",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "mobile_nav_icon_color",
+      "label": "Icon color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "mobile_nav_icon_hover_color",
+      "label": "Icon hover color",
+      "default": "#dc143c"
+    },
+    {
+      "type": "color",
+      "id": "mobile_nav_badge_bg",
+      "label": "Badge background",
+      "default": "#dc143c"
+    },
+    {
+      "type": "color",
+      "id": "mobile_nav_badge_text",
+      "label": "Badge text color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "EcuaFolk footer"
+    }
+  ]
+}
+{% endschema %}

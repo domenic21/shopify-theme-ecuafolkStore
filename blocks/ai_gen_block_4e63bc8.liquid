@@ -1,0 +1,326 @@
+{% doc %}
+  @prompt
+    Create a combined mobile-first header and hero banner section for EcuaFolk, an Ecuadorian food store. The design should look like this: a full-screen dark overlay on a landscape nature background image of Ecuador, with the store logo name at the top. The hero content should have a large bold white headline "Tus Snacks Ecuatorianos Favoritos, en la Puerta de tu Casa", a subtext paragraph "Chifles, chocolates, café y más. Llevamos el sabor auténtico del Ecuador a cualquier parte del mundo con envíos rápidos y seguros.", a prominent red CTA button "Ver Catálogo", and at the bottom 3 trust badge icons in a row: a globe icon "ENVÍO INTERNACIONAL", a checkmark icon "100% AUTÉNTICO", and a lock icon "PAGO SEGURO". The overall feel is dark, modern, and premium with white text on a dark semi-transparent overlay. The header should be minimal and transparent overlaid on top of the hero with the logo on the left and a cart icon on the right. Fully responsive and optimized for mobile phones. Include theme editor settings for background image, headline, subtext, button text and link, and the 3 trust badge labels. Add detailed code comments throughout explaining every Liquid tag, CSS class, schema setting so a developer can understand and modify the code easily., in mobile view make reduce the height , too much height, I need this to be compact why there is a minimun height? , GET RID OF THE TRUST BADGES, MAKE SURE THE IMAGE LOOKS IN FRAME IN MOBILE SO ZOOM OUT A LITLE BIT AND THE VER CATALOGO BUTTON NEEDS TO BE AT THE BOTTOM, GO BACK TO PREVIOOUS VERSION , SIZE WAS PERFECT FOR THIS COMPONENT, i WANTED THE BUTTON TO BE IN THE BOTTOM SO THE IMAGE WAS ABLKE TO LOOK CLEAR, REDUCE HEIGHT FOR THIS COMPONET MAKE ME ABLE TO CHOSE HEIGHT , GET RID OF ALL TEXT ANC CART BUTTON , JUST LEAVE THE VER CATALAGO BUTTON , ALSO LEAVE AN OPTION TO INCREASE OF DECREASE IMAGE ZOOM SO i CAN ADJUSTED. KEEP THE HEIGHT CUSTOM. SINCCE IM ADJUSTING DEPENDING ON THE IMAGES, ALSO GIVE ME AN IOOTION TO MOVE THE BUTTON VERTICALLY , there is this that is showing as text ```liquid
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-hero-banner-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: {{ block.settings.hero_height_mobile }}vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .ai-hero-banner-background-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .ai-hero-banner-background-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    transform: scale({{ block.settings.image_zoom }});
+  }
+
+  .ai-hero-banner-background-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .ai-hero-banner-background-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+  }
+
+  .ai-hero-banner-empty-state-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    font-size: 14px;
+    color: #999;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .ai-hero-banner-overlay-{{ ai_gen_id }} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, {{ block.settings.overlay_opacity }});
+    z-index: 2;
+  }
+
+  .ai-hero-banner-content-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: {{ block.settings.button_vertical_position }}px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .ai-hero-banner-cta-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    font-size: {{ block.settings.button_size_mobile }}px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: {{ block.settings.button_radius }}px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .ai-hero-banner-cta-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg_color }};
+    transform: translateY(-2px);
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-hero-banner-{{ ai_gen_id }} {
+      height: {{ block.settings.hero_height_desktop }}vh;
+    }
+
+    .ai-hero-banner-cta-{{ ai_gen_id }} {
+      font-size: {{ block.settings.button_size_desktop }}px;
+    }
+  }
+{% endstyle %}
+
+<ecuafolk-hero-banner-{{ ai_gen_id }}
+  class="ai-hero-banner-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-hero-banner-background-{{ ai_gen_id }}">
+    {% if block.settings.background_image %}
+      <img
+        src="{{ block.settings.background_image | image_url: width: 2000 }}"
+        alt="{{ block.settings.background_image.alt | escape }}"
+        loading="eager"
+        width="{{ block.settings.background_image.width }}"
+        height="{{ block.settings.background_image.height }}"
+      >
+    {% else %}
+      <div class="ai-hero-banner-background-placeholder-{{ ai_gen_id }}">
+        {{ 'hero-apparel-1' | placeholder_svg_tag }}
+        <div class="ai-hero-banner-empty-state-{{ ai_gen_id }}">
+          Add a background image of Ecuador
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="ai-hero-banner-overlay-{{ ai_gen_id }}"></div>
+
+  <div class="ai-hero-banner-content-{{ ai_gen_id }}">
+    {% if block.settings.button_text != blank %}
+      <a
+        href="{{ block.settings.button_link }}"
+        class="ai-hero-banner-cta-{{ ai_gen_id }}"
+      >
+        {{ block.settings.button_text }}
+      </a>
+    {% endif %}
+  </div>
+</ecuafolk-hero-banner-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class EcuafolkHeroBanner{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.style.display = 'block';
+      }
+    }
+
+    customElements.define('ecuafolk-hero-banner-{{ ai_gen_id }}', EcuafolkHeroBanner{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "EcuaFolk hero banner",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "hero_height_mobile",
+      "label": "Height mobile",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "hero_height_desktop",
+      "label": "Height desktop",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "range",
+      "id": "image_zoom",
+      "label": "Image zoom",
+      "min": 0.5,
+      "max": 2,
+      "step": 0.1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "default": 0.4
+    },
+    {
+      "type": "header",
+      "content": "Call to action button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Ver Catálogo"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "button_vertical_position",
+      "label": "Button vertical position",
+      "min": 10,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button background",
+      "default": "#dc2626"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Button hover background",
+      "default": "#b91c1c"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_size_mobile",
+      "label": "Button size mobile",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_size_desktop",
+      "label": "Button size desktop",
+      "min": 16,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Button vertical padding",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Button horizontal padding",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Button border radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "EcuaFolk hero banner"
+    }
+  ]
+}
+{% endschema %}

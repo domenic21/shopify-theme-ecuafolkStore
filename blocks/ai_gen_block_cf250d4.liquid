@@ -1,0 +1,545 @@
+{% doc %}
+  @prompt
+    Create a mobile-first shipping banner section for EcuaFolk, an Ecuadorian food store. The banner should be full-width with a light background, a truck/delivery icon, bold heading "Envíos a todo el país", and subtext "Llevamos un pedacito de nuestra tierra a donde quiera que estés en Estados Unidos Y Canadá." Below the text include an email newsletter signup with an input field placeholder "Tu correo electrónico" and a red submit button "SUSCRIBIRME" that connects to Shopify's newsletter customer email signup. The layout should stack vertically and look clean on mobile. Include theme editor settings for the heading, subtext, and button text. Add detailed code comments throughout explaining every Liquid tag, CSS class, schema setting, and form action so a developer can understand and modify the code easily., there is a liquid error Liquid error (temp/ai_gen_block_5813a98 line 248): Invalid form type "aehbhwi9uu1z1n2zyzaigenblock5813a98hhw8nj", must be one of ["product", "storefront_password", "contact", "customer_login", "create_customer", "recover_customer_password", "reset_customer_password", "guest_login", "currency", "activate_customer_password", "customer_address", "new_comment", "customer", "localization", "cart"]
+{% enddoc %}
+{% comment %}
+  SHIPPING BANNER BLOCK FOR ECUAFOLK
+  This block creates a mobile-first shipping banner with:
+  - Delivery truck icon
+  - Customizable heading and subtext
+  - Email newsletter signup form
+  - Full-width responsive layout
+{% endcomment %}
+
+{% comment %}
+  Generate a unique ID for this block instance
+  This prevents CSS/JS conflicts when multiple instances are on the same page
+  The replace filter removes underscores and downcase makes it lowercase
+{% endcomment %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% comment %}
+  CSS STYLES
+  All styles are scoped with the unique ai_gen_id to avoid conflicts
+  Mobile-first approach: base styles are for mobile, then media queries for larger screens
+{% endcomment %}
+{% style %}
+  .ai-shipping-banner-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: 24px 20px;
+  }
+
+  .ai-shipping-banner-container-{{ ai_gen_id }} {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .ai-shipping-banner-icon-{{ ai_gen_id }} {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+
+  .ai-shipping-banner-icon-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    fill: {{ block.settings.icon_color }};
+  }
+
+  .ai-shipping-banner-content-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .ai-shipping-banner-heading-{{ ai_gen_id }} {
+    font-size: {{ block.settings.heading_size }}px;
+    font-weight: 700;
+    color: {{ block.settings.text_color }};
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .ai-shipping-banner-subtext-{{ ai_gen_id }} {
+    font-size: {{ block.settings.subtext_size }}px;
+    color: {{ block.settings.text_color }};
+    margin: 0;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+
+  .ai-shipping-banner-form-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .ai-shipping-banner-form-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .ai-shipping-banner-input-{{ ai_gen_id }} {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid {{ block.settings.input_border_color }};
+    border-radius: {{ block.settings.input_border_radius }}px;
+    font-size: 14px;
+    background-color: #ffffff;
+    color: #121212;
+  }
+
+  .ai-shipping-banner-input-{{ ai_gen_id }}::placeholder {
+    color: #666666;
+    opacity: 1;
+  }
+
+  .ai-shipping-banner-input-{{ ai_gen_id }}:focus {
+    outline: 2px solid {{ block.settings.button_color }};
+    outline-offset: 2px;
+  }
+
+  .ai-shipping-banner-button-{{ ai_gen_id }} {
+    width: 100%;
+    padding: 14px 24px;
+    background-color: {{ block.settings.button_color }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-shipping-banner-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_color }};
+  }
+
+  .ai-shipping-banner-button-{{ ai_gen_id }}:focus {
+    outline: 2px solid {{ block.settings.text_color }};
+    outline-offset: 2px;
+  }
+
+  .ai-shipping-banner-message-{{ ai_gen_id }} {
+    margin-top: 8px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .ai-shipping-banner-success-{{ ai_gen_id }} {
+    color: #008060;
+  }
+
+  .ai-shipping-banner-error-{{ ai_gen_id }} {
+    color: #D82C0D;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-shipping-banner-{{ ai_gen_id }} {
+      padding: 32px 40px;
+    }
+
+    .ai-shipping-banner-container-{{ ai_gen_id }} {
+      max-width: 800px;
+      gap: 20px;
+    }
+
+    .ai-shipping-banner-icon-{{ ai_gen_id }} {
+      width: 56px;
+      height: 56px;
+    }
+
+    .ai-shipping-banner-heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.heading_size | times: 1.2 }}px;
+    }
+
+    .ai-shipping-banner-subtext-{{ ai_gen_id }} {
+      font-size: {{ block.settings.subtext_size | times: 1.1 }}px;
+    }
+
+    .ai-shipping-banner-form-{{ ai_gen_id }} {
+      flex-direction: row;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .ai-shipping-banner-input-{{ ai_gen_id }} {
+      flex: 1;
+    }
+
+    .ai-shipping-banner-button-{{ ai_gen_id }} {
+      width: auto;
+      white-space: nowrap;
+    }
+  }
+{% endstyle %}
+
+{% comment %}
+  MAIN HTML STRUCTURE
+  The outermost element uses the custom element tag and includes {{ block.shopify_attributes }}
+  This allows the block to be selected in the theme editor
+{% endcomment %}
+<shipping-banner-{{ ai_gen_id }}
+  class="ai-shipping-banner-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-shipping-banner-container-{{ ai_gen_id }}">
+    {% comment %}
+      DELIVERY TRUCK ICON
+      SVG icon for visual representation of shipping/delivery
+    {% endcomment %}
+    <div class="ai-shipping-banner-icon-{{ ai_gen_id }}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18 18.5a1.5 1.5 0 0 1-1.5-1.5a1.5 1.5 0 0 1 1.5-1.5a1.5 1.5 0 0 1 1.5 1.5a1.5 1.5 0 0 1-1.5 1.5m1.5-9l1.96 2.5H17V9.5m-11 9A1.5 1.5 0 0 1 4.5 17A1.5 1.5 0 0 1 6 15.5A1.5 1.5 0 0 1 7.5 17A1.5 1.5 0 0 1 6 18.5M20 8h-3V4H3c-1.11 0-2 .89-2 2v11h2a3 3 0 0 0 3 3a3 3 0 0 0 3-3h6a3 3 0 0 0 3 3a3 3 0 0 0 3-3h2v-5z"/>
+      </svg>
+    </div>
+
+    {% comment %}
+      TEXT CONTENT SECTION
+      Displays the heading and subtext from block settings
+    {% endcomment %}
+    <div class="ai-shipping-banner-content-{{ ai_gen_id }}">
+      {% comment %}
+        HEADING
+        Only renders if the merchant has entered text in the theme editor
+        Uses the richtext setting which allows basic HTML formatting
+      {% endcomment %}
+      {% if block.settings.heading != blank %}
+        <h2 class="ai-shipping-banner-heading-{{ ai_gen_id }}">
+          {{ block.settings.heading }}
+        </h2>
+      {% endif %}
+
+      {% comment %}
+        SUBTEXT
+        Only renders if the merchant has entered text in the theme editor
+        Uses the richtext setting for formatted text
+      {% endcomment %}
+      {% if block.settings.subtext != blank %}
+        <div class="ai-shipping-banner-subtext-{{ ai_gen_id }}">
+          {{ block.settings.subtext }}
+        </div>
+      {% endif %}
+    </div>
+
+    {% comment %}
+      EMAIL NEWSLETTER SIGNUP FORM
+      Uses Shopify's 'customer' form type to handle newsletter subscriptions
+      The form automatically processes the email and adds it to the customer list
+    {% endcomment %}
+    <div class="ai-shipping-banner-form-wrapper-{{ ai_gen_id }}">
+      {% comment %}
+        SHOPIFY CUSTOMER FORM
+        form 'customer' creates a form that submits to Shopify's customer endpoint
+        This is the standard way to handle newsletter signups in Shopify themes
+        We assign a CSS class name by creating a variable first
+      {% endcomment %}
+      {% assign form_class = 'ai-shipping-banner-form-' | append: ai_gen_id %}
+      {%- form 'customer', class: form_class -%}
+        {% comment %}
+          HIDDEN INPUT FOR FORM TYPE
+          This tells Shopify that this is a newsletter signup form
+          The contact[tags] field tags the customer as a newsletter subscriber
+        {% endcomment %}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+
+        {% comment %}
+          EMAIL INPUT FIELD
+          - type="email" provides browser validation for email format
+          - name="contact[email]" is required by Shopify's customer form
+          - value="{{ form.email }}" preserves the entered email if there's an error
+          - aria-required="true" indicates this is a required field for screen readers
+          - autocomplete="email" helps browsers autofill the email address
+          - placeholder uses the customizable text from block settings
+        {% endcomment %}
+        <input
+          type="email"
+          name="contact[email]"
+          class="ai-shipping-banner-input-{{ ai_gen_id }}"
+          value="{{ form.email }}"
+          aria-required="true"
+          autocorrect="off"
+          autocapitalize="off"
+          autocomplete="email"
+          {% comment %}
+            Conditional aria attributes for accessibility
+            If form has errors, mark field as invalid and link to error message
+            If form submitted successfully, link to success message
+          {% endcomment %}
+          {% if form.errors %}
+            aria-invalid="true"
+            aria-describedby="ai-shipping-banner-error-{{ ai_gen_id }}"
+          {% elsif form.posted_successfully? %}
+            aria-describedby="ai-shipping-banner-success-{{ ai_gen_id }}"
+          {% endif %}
+          placeholder="{{ block.settings.email_placeholder }}"
+          required
+        >
+
+        {% comment %}
+          SUBMIT BUTTON
+          type="submit" triggers form submission
+          Button text is customizable via block settings
+        {% endcomment %}
+        <button
+          type="submit"
+          class="ai-shipping-banner-button-{{ ai_gen_id }}"
+        >
+          {{ block.settings.button_text }}
+        </button>
+
+        {% comment %}
+          ERROR MESSAGE DISPLAY
+          Shows if the form has validation errors (e.g., invalid email)
+          form.errors is a Shopify object that contains error information
+          The id matches the aria-describedby on the input for accessibility
+        {% endcomment %}
+        {%- if form.errors -%}
+          <div
+            id="ai-shipping-banner-error-{{ ai_gen_id }}"
+            class="ai-shipping-banner-message-{{ ai_gen_id }} ai-shipping-banner-error-{{ ai_gen_id }}"
+          >
+            {{ form.errors.messages.email }}
+          </div>
+        {%- endif -%}
+
+        {% comment %}
+          SUCCESS MESSAGE DISPLAY
+          Shows when the form is successfully submitted
+          form.posted_successfully? is a Shopify boolean that checks submission status
+          The id matches the aria-describedby on the input for accessibility
+        {% endcomment %}
+        {%- if form.posted_successfully? -%}
+          <div
+            id="ai-shipping-banner-success-{{ ai_gen_id }}"
+            class="ai-shipping-banner-message-{{ ai_gen_id }} ai-shipping-banner-success-{{ ai_gen_id }}"
+          >
+            {{ block.settings.success_message }}
+          </div>
+        {%- endif -%}
+      {%- endform -%}
+    </div>
+  </div>
+</shipping-banner-{{ ai_gen_id }}>
+
+{% comment %}
+  JAVASCRIPT WEB COMPONENT
+  Creates a custom HTML element for the shipping banner
+  Wrapped in an IIFE (Immediately Invoked Function Expression) to avoid global scope pollution
+{% endcomment %}
+<script>
+  (function() {
+    {% comment %}
+      Define the custom element class
+      Extends HTMLElement to create a custom web component
+    {% endcomment %}
+    class ShippingBanner{{ ai_gen_id }} extends HTMLElement {
+      {% comment %}
+        Constructor is called when the element is created
+        Must call super() first to initialize the parent HTMLElement class
+      {% endcomment %}
+      constructor() {
+        super();
+      }
+
+      {% comment %}
+        connectedCallback is a lifecycle method
+        Called when the element is added to the DOM
+        This is where we set up event listeners and initialize functionality
+      {% endcomment %}
+      connectedCallback() {
+        {% comment %}
+          Find the form element within this component
+          querySelector searches only within this element's children
+        {% endcomment %}
+        this.form = this.querySelector('.ai-shipping-banner-form-{{ ai_gen_id }}');
+        
+        {% comment %}
+          If form exists, set up event listener
+          This allows us to add custom behavior on form submission if needed
+        {% endcomment %}
+        if (this.form) {
+          this.form.addEventListener('submit', this.handleSubmit.bind(this));
+        }
+      }
+
+      {% comment %}
+        Handle form submission
+        Currently just allows default Shopify form handling
+        Can be extended to add custom analytics or validation
+      {% endcomment %}
+      handleSubmit(event) {
+        {% comment %}
+          Default form submission is handled by Shopify
+          This method is here for future customization if needed
+        {% endcomment %}
+      }
+    }
+
+    {% comment %}
+      Register the custom element with the browser
+      The element name must contain a hyphen (shipping-banner-{{ ai_gen_id }})
+      This makes it available to use in HTML as <shipping-banner-{{ ai_gen_id }}>
+    {% endcomment %}
+    customElements.define('shipping-banner-{{ ai_gen_id }}', ShippingBanner{{ ai_gen_id }});
+  })();
+</script>
+
+{% comment %}
+  BLOCK SCHEMA
+  Defines the settings that appear in the Shopify theme editor
+  Merchants can customize these values without editing code
+{% endcomment %}
+{% schema %}
+{
+  "name": "Shipping banner",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Envíos a todo el país"
+    },
+    {
+      "type": "richtext",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "<p>Llevamos un pedacito de nuestra tierra a donde quiera que estés en Estados Unidos Y Canadá.</p>"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "email_placeholder",
+      "label": "Email placeholder",
+      "default": "Tu correo electrónico"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "SUSCRIBIRME"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "success_message",
+      "label": "Success message",
+      "default": "¡Gracias por suscribirte!"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#f9f5f0"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon",
+      "default": "#DD2739"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button background",
+      "default": "#DD2739"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "Button hover background",
+      "default": "#b81f2d"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "Input border",
+      "default": "#cccccc"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 16,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading size",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "subtext_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Subtext size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "input_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Input border radius",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Button border radius",
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shipping banner"
+    }
+  ]
+}
+{% endschema %}

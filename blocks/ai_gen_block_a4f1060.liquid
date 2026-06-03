@@ -1,0 +1,740 @@
+{% doc %}
+  @prompt
+    Create a full-screen search overlay component for EcuaFolk, an Ecuadorian food store. When the search icon is clicked (from either the desktop header or the mobile bottom navigation bar), a full-screen overlay slides in or fades in with: a dark semi-transparent background, a large centered search input field with placeholder "Buscar productos...", a close (X) button in the top right corner, and live search results that appear below the input as the user types using Shopify's Predictive Search API (/search/suggest.json). Each result should show the product image thumbnail, product name, and price. Clicking a result navigates to the product page. The overlay should close when clicking the X button, pressing Escape key, or clicking outside the results area. The JavaScript should attach to any element with the class "search-trigger" so both the header search icon and the mobile bottom nav search icon can trigger it by simply adding that class. Add detailed code comments explaining every function, CSS animation, and API call so a developer can easily understand and modify it. Make it mobile-friendly with large touch targets., I cant see it, needs to be hidden and if click on search buttons on header or footer needs to appeaer on top so user can search upo 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-search-overlay-{{ ai_gen_id }} {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: {{ block.settings.overlay_bg_color }};
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity {{ block.settings.animation_duration }}s ease, visibility {{ block.settings.animation_duration }}s ease;
+    pointer-events: none;
+  }
+
+  .ai-search-overlay-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .ai-search-overlay-container-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .ai-search-overlay-close-{{ ai_gen_id }} {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 12px;
+    color: {{ block.settings.text_color }};
+    transition: transform 0.2s ease;
+    z-index: 10;
+  }
+
+  .ai-search-overlay-close-{{ ai_gen_id }}:hover {
+    transform: scale(1.1);
+  }
+
+  .ai-search-overlay-close-{{ ai_gen_id }} svg {
+    width: {{ block.settings.close_button_size }}px;
+    height: {{ block.settings.close_button_size }}px;
+  }
+
+  .ai-search-overlay-content-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: {{ block.settings.max_width }}px;
+    margin-top: 80px;
+  }
+
+  .ai-search-overlay-input-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    margin-bottom: 30px;
+  }
+
+  .ai-search-overlay-input-{{ ai_gen_id }} {
+    width: 100%;
+    padding: {{ block.settings.input_padding }}px {{ block.settings.input_padding | times: 1.5 }}px;
+    font-size: {{ block.settings.input_font_size }}px;
+    border: {{ block.settings.input_border_width }}px solid {{ block.settings.input_border_color }};
+    border-radius: {{ block.settings.input_border_radius }}px;
+    background-color: {{ block.settings.input_bg_color }};
+    color: {{ block.settings.text_color }};
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+
+  .ai-search-overlay-input-{{ ai_gen_id }}:focus {
+    border-color: {{ block.settings.input_focus_border_color }};
+  }
+
+  .ai-search-overlay-input-{{ ai_gen_id }}::placeholder {
+    color: {{ block.settings.placeholder_color }};
+  }
+
+  .ai-search-overlay-loading-{{ ai_gen_id }} {
+    position: absolute;
+    right: {{ block.settings.input_padding | times: 1.5 }}px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid {{ block.settings.text_color }};
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: ai-search-spin-{{ ai_gen_id }} 0.6s linear infinite;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .ai-search-overlay-loading-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  @keyframes ai-search-spin-{{ ai_gen_id }} {
+    to {
+      transform: translateY(-50%) rotate(360deg);
+    }
+  }
+
+  .ai-search-overlay-results-{{ ai_gen_id }} {
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .ai-search-overlay-results-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ai-search-overlay-results-header-{{ ai_gen_id }} {
+    font-size: {{ block.settings.results_header_size }}px;
+    color: {{ block.settings.text_color }};
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .ai-search-overlay-results-list-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ai-search-overlay-result-item-{{ ai_gen_id }} {
+    background-color: {{ block.settings.result_bg_color }};
+    border-radius: {{ block.settings.result_border_radius }}px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+  }
+
+  .ai-search-overlay-result-item-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .ai-search-overlay-result-link-{{ ai_gen_id }} {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    text-decoration: none;
+    color: inherit;
+    align-items: center;
+  }
+
+  .ai-search-overlay-result-image-{{ ai_gen_id }} {
+    width: {{ block.settings.result_image_size }}px;
+    height: {{ block.settings.result_image_size }}px;
+    flex-shrink: 0;
+    border-radius: {{ block.settings.result_image_radius }}px;
+    overflow: hidden;
+    background-color: #f4f4f4;
+  }
+
+  .ai-search-overlay-result-image-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-search-overlay-result-info-{{ ai_gen_id }} {
+    flex-grow: 1;
+    min-width: 0;
+  }
+
+  .ai-search-overlay-result-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.result_title_size }}px;
+    color: {{ block.settings.result_text_color }};
+    margin: 0 0 8px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .ai-search-overlay-result-price-{{ ai_gen_id }} {
+    font-size: {{ block.settings.result_price_size }}px;
+    color: {{ block.settings.result_price_color }};
+    font-weight: 500;
+  }
+
+  .ai-search-overlay-no-results-{{ ai_gen_id }} {
+    text-align: center;
+    padding: 40px 20px;
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.input_font_size }}px;
+  }
+
+  .ai-search-overlay-empty-state-{{ ai_gen_id }} {
+    text-align: center;
+    padding: 60px 20px;
+    color: {{ block.settings.placeholder_color }};
+    font-size: {{ block.settings.results_header_size }}px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-search-overlay-content-{{ ai_gen_id }} {
+      margin-top: 60px;
+    }
+
+    .ai-search-overlay-input-{{ ai_gen_id }} {
+      font-size: {{ block.settings.input_font_size | times: 0.9 }}px;
+      padding: {{ block.settings.input_padding | times: 0.8 }}px {{ block.settings.input_padding | times: 1.2 }}px;
+    }
+
+    .ai-search-overlay-results-list-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+    }
+
+    .ai-search-overlay-result-link-{{ ai_gen_id }} {
+      padding: 12px;
+    }
+
+    .ai-search-overlay-result-image-{{ ai_gen_id }} {
+      width: {{ block.settings.result_image_size | times: 0.8 }}px;
+      height: {{ block.settings.result_image_size | times: 0.8 }}px;
+    }
+  }
+{% endstyle %}
+
+<search-overlay-{{ ai_gen_id }}
+  class="ai-search-overlay-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+  data-animation-duration="{{ block.settings.animation_duration }}"
+>
+  <div class="ai-search-overlay-container-{{ ai_gen_id }}">
+    <button
+      class="ai-search-overlay-close-{{ ai_gen_id }}"
+      aria-label="Close search"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <div class="ai-search-overlay-content-{{ ai_gen_id }}">
+      <div class="ai-search-overlay-input-wrapper-{{ ai_gen_id }}">
+        <input
+          type="text"
+          class="ai-search-overlay-input-{{ ai_gen_id }}"
+          placeholder="{{ block.settings.placeholder_text }}"
+          aria-label="Search products"
+          autocomplete="off"
+        >
+        <div class="ai-search-overlay-loading-{{ ai_gen_id }}"></div>
+      </div>
+
+      <div class="ai-search-overlay-results-{{ ai_gen_id }}">
+        <div class="ai-search-overlay-results-header-{{ ai_gen_id }}"></div>
+        <ul class="ai-search-overlay-results-list-{{ ai_gen_id }}"></ul>
+      </div>
+
+      <div class="ai-search-overlay-empty-state-{{ ai_gen_id }}">
+        {{ block.settings.empty_state_text }}
+      </div>
+    </div>
+  </div>
+</search-overlay-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class SearchOverlay{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.overlay = this;
+        this.closeButton = this.querySelector('.ai-search-overlay-close-{{ ai_gen_id }}');
+        this.input = this.querySelector('.ai-search-overlay-input-{{ ai_gen_id }}');
+        this.resultsContainer = this.querySelector('.ai-search-overlay-results-{{ ai_gen_id }}');
+        this.resultsHeader = this.querySelector('.ai-search-overlay-results-header-{{ ai_gen_id }}');
+        this.resultsList = this.querySelector('.ai-search-overlay-results-list-{{ ai_gen_id }}');
+        this.loadingIndicator = this.querySelector('.ai-search-overlay-loading-{{ ai_gen_id }}');
+        this.emptyState = this.querySelector('.ai-search-overlay-empty-state-{{ ai_gen_id }}');
+        this.container = this.querySelector('.ai-search-overlay-container-{{ ai_gen_id }}');
+        this.searchTimeout = null;
+        this.currentRequest = null;
+      }
+
+      connectedCallback() {
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.closeButton.addEventListener('click', () => this.close());
+
+        this.input.addEventListener('input', (e) => this.handleInput(e));
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.overlay.classList.contains('active')) {
+            this.close();
+          }
+        });
+
+        this.overlay.addEventListener('click', (e) => {
+          if (e.target === this.overlay || e.target === this.container) {
+            this.close();
+          }
+        });
+
+        const setupTriggers = () => {
+          const triggers = document.querySelectorAll('a[href="/search"], button[aria-label*="Search"], button[aria-label*="search"], .header__search, details-modal[id*="search"] summary, .search-modal__toggle, .modal__toggle[name*="search"]');
+          
+          triggers.forEach((trigger) => {
+            trigger.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              this.open();
+            });
+          });
+        };
+
+        setupTriggers();
+
+        setTimeout(setupTriggers, 1000);
+
+        const observer = new MutationObserver(() => {
+          setupTriggers();
+        });
+
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+      }
+
+      open() {
+        this.overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+          this.input.focus();
+        }, 100);
+      }
+
+      close() {
+        this.overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        this.input.value = '';
+        this.clearResults();
+        this.showEmptyState();
+      }
+
+      handleInput(e) {
+        const query = e.target.value.trim();
+
+        clearTimeout(this.searchTimeout);
+
+        if (this.currentRequest) {
+          this.currentRequest.abort();
+        }
+
+        if (query.length === 0) {
+          this.clearResults();
+          this.showEmptyState();
+          this.hideLoading();
+          return;
+        }
+
+        if (query.length < 2) {
+          return;
+        }
+
+        this.showLoading();
+
+        this.searchTimeout = setTimeout(() => {
+          this.performSearch(query);
+        }, 300);
+      }
+
+      async performSearch(query) {
+        try {
+          const controller = new AbortController();
+          this.currentRequest = controller;
+
+          const url = `/search/suggest.json?q=${encodeURIComponent(query)}&resources[type]=product&resources[limit]=12`;
+
+          const response = await fetch(url, {
+            signal: controller.signal
+          });
+
+          if (!response.ok) {
+            throw new Error('Search request failed');
+          }
+
+          const data = await response.json();
+
+          this.hideLoading();
+          this.displayResults(data.resources.results.products || [], query);
+
+        } catch (error) {
+          if (error.name !== 'AbortError') {
+            console.error('Search error:', error);
+            this.hideLoading();
+            this.showNoResults();
+          }
+        } finally {
+          this.currentRequest = null;
+        }
+      }
+
+      displayResults(products, query) {
+        this.hideEmptyState();
+
+        if (products.length === 0) {
+          this.showNoResults();
+          return;
+        }
+
+        this.resultsHeader.textContent = `${products.length} resultado${products.length !== 1 ? 's' : ''} para "${query}"`;
+
+        this.resultsList.innerHTML = products.map(product => {
+          const imageUrl = product.image ? product.image : '';
+          const price = this.formatMoney(product.price);
+
+          return `
+            <li class="ai-search-overlay-result-item-{{ ai_gen_id }}">
+              <a href="${product.url}" class="ai-search-overlay-result-link-{{ ai_gen_id }}">
+                <div class="ai-search-overlay-result-image-{{ ai_gen_id }}">
+                  ${imageUrl ? `<img src="${imageUrl}" alt="${this.escapeHtml(product.title)}" loading="lazy">` : ''}
+                </div>
+                <div class="ai-search-overlay-result-info-{{ ai_gen_id }}">
+                  <h3 class="ai-search-overlay-result-title-{{ ai_gen_id }}">${this.escapeHtml(product.title)}</h3>
+                  <div class="ai-search-overlay-result-price-{{ ai_gen_id }}">${price}</div>
+                </div>
+              </a>
+            </li>
+          `;
+        }).join('');
+
+        this.resultsContainer.classList.add('active');
+      }
+
+      formatMoney(cents) {
+        const dollars = (cents / 100).toFixed(2);
+        return `$${dollars}`;
+      }
+
+      escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      showLoading() {
+        this.loadingIndicator.classList.add('active');
+      }
+
+      hideLoading() {
+        this.loadingIndicator.classList.remove('active');
+      }
+
+      clearResults() {
+        this.resultsList.innerHTML = '';
+        this.resultsHeader.textContent = '';
+        this.resultsContainer.classList.remove('active');
+      }
+
+      showNoResults() {
+        this.clearResults();
+        this.resultsList.innerHTML = `
+          <div class="ai-search-overlay-no-results-{{ ai_gen_id }}">
+            No se encontraron productos. Intenta con otra búsqueda.
+          </div>
+        `;
+        this.resultsContainer.classList.add('active');
+      }
+
+      showEmptyState() {
+        this.emptyState.style.display = 'block';
+      }
+
+      hideEmptyState() {
+        this.emptyState.style.display = 'none';
+      }
+    }
+
+    customElements.define('search-overlay-{{ ai_gen_id }}', SearchOverlay{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Search overlay",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "placeholder_text",
+      "label": "Search placeholder",
+      "default": "Buscar productos..."
+    },
+    {
+      "type": "text",
+      "id": "empty_state_text",
+      "label": "Empty state text",
+      "default": "Comienza a escribir para buscar productos"
+    },
+    {
+      "type": "header",
+      "content": "Overlay style"
+    },
+    {
+      "type": "color",
+      "id": "overlay_bg_color",
+      "label": "Background color",
+      "default": "rgba(0, 0, 0, 0.95)"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "min": 400,
+      "max": 1200,
+      "step": 50,
+      "unit": "px",
+      "label": "Maximum width",
+      "default": 800
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "label": "Animation duration",
+      "default": 0.3
+    },
+    {
+      "type": "header",
+      "content": "Close button"
+    },
+    {
+      "type": "range",
+      "id": "close_button_size",
+      "min": 20,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Close button size",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Search input"
+    },
+    {
+      "type": "color",
+      "id": "input_bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "input_border_color",
+      "label": "Border color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "input_focus_border_color",
+      "label": "Focus border color",
+      "default": "#334fb4"
+    },
+    {
+      "type": "color",
+      "id": "placeholder_color",
+      "label": "Placeholder color",
+      "default": "#999999"
+    },
+    {
+      "type": "range",
+      "id": "input_font_size",
+      "min": 14,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Font size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "input_padding",
+      "min": 10,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "input_border_width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Border width",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "input_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Border radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Results"
+    },
+    {
+      "type": "range",
+      "id": "results_header_size",
+      "min": 14,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "label": "Header font size",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "result_bg_color",
+      "label": "Result background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "result_text_color",
+      "label": "Result text color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "result_price_color",
+      "label": "Price color",
+      "default": "#334fb4"
+    },
+    {
+      "type": "range",
+      "id": "result_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Result border radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "result_image_size",
+      "min": 50,
+      "max": 120,
+      "step": 10,
+      "unit": "px",
+      "label": "Image size",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "result_image_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "result_title_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Title font size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "result_price_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Price font size",
+      "default": 14
+    }
+  ],
+  "presets": [
+    {
+      "name": "Search overlay"
+    }
+  ]
+}
+{% endschema %}
