@@ -464,7 +464,7 @@
       }
 
       formatMoney(cents) {
-        const dollars = (cents / 100).toFixed(2);
+        const dollars = parseFloat(cents).toFixed(2);
         return `$${dollars}`;
       }
 

@@ -364,7 +364,7 @@
       }
       
       const resultsHTML = products.map(product => {
-        const price = product.price ? (product.price / 100).toFixed(2) : '0.00';
+        const price = product.price ? parseFloat(product.price).toFixed(2) : '0.00';
         const imageUrl = product.image ? product.image : '';
         
         return `
