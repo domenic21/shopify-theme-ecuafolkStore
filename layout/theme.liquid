@@ -468,7 +468,7 @@
                   return;
                 }
                 results.innerHTML = products.map(function(p) {
-                  var price = p.price ? '$' + (p.price / 100).toFixed(2) + ' USD' : '';
+                  var price = p.price ? '$' + parseFloat(p.price).toFixed(2) + ' USD' : '';
                   var img = p.image ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy">' : '';
                   return '<a href="' + p.url + '" class="ecuafolk-result-item"><div class="ecuafolk-result-img">' + img + '</div><div class="ecuafolk-result-info"><div class="ecuafolk-result-title">' + p.title + '</div><div class="ecuafolk-result-price">' + price + '</div></div></a>';
                 }).join('');
