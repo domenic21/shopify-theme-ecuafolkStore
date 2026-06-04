@@ -448,6 +448,9 @@
 
       <div class="ai-ecuafolk-header__right-{{ ai_gen_id }}">
         {% if block.settings.show_language_selector %}
+          {%- form 'localization', id: 'localization-form-{{ ai_gen_id }}' -%}
+            <input type="hidden" name="locale_code" id="locale-code-{{ ai_gen_id }}" value="{{ request.locale.iso_code }}">
+          {%- endform -%}
           <div class="ai-ecuafolk-header__language-selector-{{ ai_gen_id }}">
             <button
               class="ai-ecuafolk-header__language-button-{{ ai_gen_id }}"
@@ -768,6 +771,14 @@
             
             this.languageToggle.setAttribute('aria-expanded', 'false');
             this.languageDropdown.classList.remove('active');
+
+            // Submit Shopify localization form to actually switch the language
+            const localeInput = document.getElementById('locale-code-{{ ai_gen_id }}');
+            const localizationForm = document.getElementById('localization-form-{{ ai_gen_id }}');
+            if (localeInput && localizationForm) {
+              localeInput.value = languageCode;
+              localizationForm.submit();
+            }
           });
         });
 
