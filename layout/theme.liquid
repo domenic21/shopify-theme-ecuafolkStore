@@ -482,5 +482,41 @@
         });
       })();
     </script>
+    <!-- Global cart badge updater: keeps [data-cart-badge] elements in sync after AJAX cart changes -->
+    <script>
+      (function() {
+        function updateCartBadges(count) {
+          document.querySelectorAll('[data-cart-badge]').forEach(function(badge) {
+            badge.textContent = count;
+            badge.style.display = count > 0 ? '' : 'none';
+          });
+        }
+
+        // Hook into Dawn theme's pubsub cart-update event
+        document.addEventListener('DOMContentLoaded', function() {
+          if (typeof subscribe !== 'undefined') {
+            subscribe('cart-update', function(event) {
+              var count = event && event.cart ? event.cart.item_count : 0;
+              updateCartBadges(count);
+            });
+          }
+        });
+
+        // Fallback: intercept any fetch to /cart/add.js or /cart/change.js and refresh count
+        var _fetch = window.fetch;
+        window.fetch = function() {
+          var args = arguments;
+          return _fetch.apply(this, args).then(function(response) {
+            var url = (args[0] || '').toString();
+            if (url.indexOf('/cart/add') !== -1 || url.indexOf('/cart/change') !== -1 || url.indexOf('/cart/update') !== -1) {
+              _fetch('/cart.js').then(function(r) { return r.json(); }).then(function(cart) {
+                updateCartBadges(cart.item_count);
+              });
+            }
+            return response;
+          });
+        };
+      })();
+    </script>
   </body>
 </html>
