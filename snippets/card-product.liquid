@@ -35,7 +35,7 @@
     .card__qty-input::-webkit-outer-spin-button,.card__qty-input::-webkit-inner-spin-button{-webkit-appearance:none}
   </style>
 {%- endunless -%}
-{%- if card_product and card_product != empty -%}3
+{%- if card_product and card_product != empty -%}
   {%- liquid
     assign ratio = 1
     if card_product.featured_media and media_aspect_ratio == 'portrait'
