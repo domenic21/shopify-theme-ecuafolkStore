@@ -27,6 +27,13 @@
   {{ 'component-price.css' | asset_url | stylesheet_tag }}
   {{ 'quick-order-list.css' | asset_url | stylesheet_tag }}
   {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
+  <style>
+    .card__qty-wrap{display:flex;align-items:center;margin-bottom:8px;border:1px solid rgba(var(--color-foreground),.25);border-radius:4px;overflow:hidden;width:fit-content}
+    .card__qty-btn{width:36px;height:36px;border:none;background:transparent;cursor:pointer;font-size:18px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;color:inherit}
+    .card__qty-btn:hover{background:rgba(var(--color-foreground),.08)}
+    .card__qty-input{width:40px;height:36px;border:none;border-left:1px solid rgba(var(--color-foreground),.25);border-right:1px solid rgba(var(--color-foreground),.25);text-align:center;font-size:14px;font-family:inherit;color:inherit;background:transparent;-moz-appearance:textfield;appearance:textfield}
+    .card__qty-input::-webkit-outer-spin-button,.card__qty-input::-webkit-inner-spin-button{-webkit-appearance:none}
+  </style>
 {%- endunless -%}
 {%- if card_product and card_product != empty -%}
   {%- liquid
@@ -354,6 +361,13 @@
                       disabled
                     {% endif %}
                   >
+                  {% if show_quantity %}
+                    <div class="card__qty-wrap">
+                      <button type="button" class="card__qty-btn" aria-label="Reduce quantity" onclick="var i=this.parentNode.querySelector('input[name=quantity]');i.value=Math.max(1,(parseInt(i.value)||1)-1)">&#8722;</button>
+                      <input type="number" name="quantity" value="1" min="1" class="card__qty-input" aria-label="Quantity">
+                      <button type="button" class="card__qty-btn" aria-label="Increase quantity" onclick="var i=this.parentNode.querySelector('input[name=quantity]');i.value=(parseInt(i.value)||1)+1">&#43;</button>
+                    </div>
+                  {% endif %}
                   <button
                     id="{{ product_form_id }}-submit"
                     type="submit"
