@@ -135,6 +135,45 @@
     font-size: 16px;
   }
 
+  .ai-featured-collection__qty-wrap-{{ ai_gen_id }} {
+    display: none;
+    align-items: center;
+    width: 100%;
+    border: 2px solid {{ block.settings.button_background }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    overflow: hidden;
+    margin-top: auto;
+  }
+
+  .ai-featured-collection__qty-btn-{{ ai_gen_id }} {
+    width: 40px;
+    height: 40px;
+    background: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+
+  .ai-featured-collection__qty-btn-{{ ai_gen_id }}:hover {
+    opacity: 0.85;
+  }
+
+  .ai-featured-collection__qty-display-{{ ai_gen_id }} {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: {{ block.settings.button_background }};
+    padding: 0 4px;
+  }
+
   @media screen and (min-width: 750px) {
     .ai-featured-collection-{{ ai_gen_id }} {
       padding: 40px 24px;
@@ -214,18 +253,29 @@
                   {{ product.price | money }}
                 </p>
 
-                <button
-                  class="ai-featured-collection__add-to-cart-{{ ai_gen_id }}"
-                  data-product-id="{{ product.id }}"
+                <div
+                  class="ai-featured-collection__cart-area-{{ ai_gen_id }}"
+                  data-cart-area
                   data-variant-id="{{ product.selected_or_first_available_variant.id }}"
-                  {% unless product.available %}disabled{% endunless %}
                 >
-                  {% if product.available %}
-                    {{ block.settings.button_text }}
-                  {% else %}
-                    Agotado
-                  {% endif %}
-                </button>
+                  <button
+                    class="ai-featured-collection__add-to-cart-{{ ai_gen_id }}"
+                    data-product-id="{{ product.id }}"
+                    data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+                    {% unless product.available %}disabled{% endunless %}
+                  >
+                    {% if product.available %}
+                      {{ block.settings.button_text }}
+                    {% else %}
+                      Agotado
+                    {% endif %}
+                  </button>
+                  <div class="ai-featured-collection__qty-wrap-{{ ai_gen_id }}" data-qty-wrap>
+                    <button type="button" class="ai-featured-collection__qty-btn-{{ ai_gen_id }}" data-qty-decrease>&#8722;</button>
+                    <span class="ai-featured-collection__qty-display-{{ ai_gen_id }}" data-qty-display>1</span>
+                    <button type="button" class="ai-featured-collection__qty-btn-{{ ai_gen_id }}" data-qty-increase>&#43;</button>
+                  </div>
+                </div>
               </div>
             </div>
           {% endfor %}
@@ -246,87 +296,107 @@
 <script>
   (function() {
     class FeaturedCollection{{ ai_gen_id }} extends HTMLElement {
-      constructor() {
-        super();
-      }
-
       connectedCallback() {
-        this.buttons = this.querySelectorAll('.ai-featured-collection__add-to-cart-{{ ai_gen_id }}');
+        this.cartAreas = this.querySelectorAll('[data-cart-area]');
         this.setupEventListeners();
+        this.initCartState();
       }
 
       setupEventListeners() {
-        this.buttons.forEach((button) => {
-          button.addEventListener('click', this.handleAddToCart.bind(this));
+        this.cartAreas.forEach((area) => {
+          const atcBtn = area.querySelector('.ai-featured-collection__add-to-cart-{{ ai_gen_id }}');
+          const decreaseBtn = area.querySelector('[data-qty-decrease]');
+          const increaseBtn = area.querySelector('[data-qty-increase]');
+          if (atcBtn) atcBtn.addEventListener('click', (e) => this.handleAddToCart(e, area));
+          if (decreaseBtn) decreaseBtn.addEventListener('click', () => this.handleQtyChange(area, -1));
+          if (increaseBtn) increaseBtn.addEventListener('click', () => this.handleQtyChange(area, 1));
         });
       }
 
-      async handleAddToCart(event) {
-        const button = event.target;
-        const variantId = button.getAttribute('data-variant-id');
-        
-        if (!variantId || button.disabled) {
-          return;
-        }
+      async initCartState() {
+        try {
+          const res = await fetch('/cart.js');
+          const cart = await res.json();
+          this.cartAreas.forEach((area) => {
+            const variantId = parseInt(area.dataset.variantId);
+            const item = cart.items.find(i => i.variant_id === variantId);
+            if (item && item.quantity > 0) this.showStepper(area, item.quantity);
+          });
+        } catch(e) {}
+      }
 
-        const originalText = button.textContent;
+      async handleAddToCart(event, area) {
+        const button = area.querySelector('.ai-featured-collection__add-to-cart-{{ ai_gen_id }}');
+        const variantId = area.dataset.variantId;
+        if (!variantId || button.disabled) return;
+        const originalText = button.textContent.trim();
         button.disabled = true;
         button.textContent = 'Agregando...';
-
         try {
-          const response = await fetch('/cart/add.js', {
+          const res = await fetch('/cart/add.js', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              id: variantId,
-              quantity: 1
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: variantId, quantity: 1 })
           });
-
-          if (!response.ok) {
-            throw new Error('Error al agregar al carrito');
-          }
-
-          const data = await response.json();
-          
-          button.textContent = '¡Agregado!';
-          
-          this.updateCartCount();
-          
-          setTimeout(() => {
-            button.textContent = originalText;
-            button.disabled = false;
-          }, 2000);
-
-        } catch (error) {
-          console.error('Error:', error);
+          if (!res.ok) throw new Error();
+          this.showStepper(area, 1);
+          this.refreshCartBadge();
+        } catch(error) {
           button.textContent = 'Error';
-          
-          setTimeout(() => {
-            button.textContent = originalText;
-            button.disabled = false;
-          }, 2000);
+          setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2000);
         }
       }
 
-      async updateCartCount() {
-        try {
-          const response = await fetch('/cart.js');
-          const cart = await response.json();
-          
-          const cartCountElements = document.querySelectorAll('.cart-count-bubble span, [data-cart-count]');
-          cartCountElements.forEach((element) => {
-            element.textContent = cart.item_count;
-          });
-
-          document.documentElement.dispatchEvent(new CustomEvent('cart:refresh', {
-            bubbles: true
-          }));
-        } catch (error) {
-          console.error('Error updating cart count:', error);
+      async handleQtyChange(area, delta) {
+        const qtyDisplay = area.querySelector('[data-qty-display]');
+        const variantId = area.dataset.variantId;
+        const currentQty = parseInt(qtyDisplay.textContent) || 0;
+        const newQty = Math.max(0, currentQty + delta);
+        if (newQty === 0) {
+          this.showAtcButton(area);
+        } else {
+          qtyDisplay.textContent = newQty;
         }
+        try {
+          await fetch('/cart/change.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: variantId, quantity: newQty })
+          });
+          this.refreshCartBadge();
+        } catch(e) {
+          if (newQty === 0) { this.showStepper(area, currentQty); }
+          else { qtyDisplay.textContent = currentQty; }
+        }
+      }
+
+      showStepper(area, qty) {
+        const atcBtn = area.querySelector('.ai-featured-collection__add-to-cart-{{ ai_gen_id }}');
+        const qtyWrap = area.querySelector('[data-qty-wrap]');
+        const qtyDisplay = area.querySelector('[data-qty-display]');
+        atcBtn.style.display = 'none';
+        qtyDisplay.textContent = qty;
+        qtyWrap.style.display = 'flex';
+      }
+
+      showAtcButton(area) {
+        const atcBtn = area.querySelector('.ai-featured-collection__add-to-cart-{{ ai_gen_id }}');
+        const qtyWrap = area.querySelector('[data-qty-wrap]');
+        qtyWrap.style.display = 'none';
+        atcBtn.style.display = '';
+        atcBtn.disabled = false;
+      }
+
+      async refreshCartBadge() {
+        try {
+          const res = await fetch('/cart.js');
+          const cart = await res.json();
+          document.querySelectorAll('[data-cart-badge]').forEach(el => {
+            el.textContent = cart.item_count;
+            el.style.display = cart.item_count > 0 ? '' : 'none';
+          });
+          document.documentElement.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+        } catch(e) {}
       }
     }
 
