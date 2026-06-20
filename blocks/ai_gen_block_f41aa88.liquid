@@ -222,6 +222,59 @@
   .ai-ecuafolk-header__mobile-right-{{ ai_gen_id }} {
     display: flex;
     align-items: center;
+    gap: 8px;
+  }
+
+  .ai-ecuafolk-header__mobile-lang-{{ ai_gen_id }} {
+    position: relative;
+  }
+
+  .ai-ecuafolk-header__mobile-lang-btn-{{ ai_gen_id }} {
+    background: none;
+    border: 1px solid {{ block.settings.border_color }};
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: {{ block.settings.icon_color }};
+    cursor: pointer;
+    min-height: 0;
+    height: auto;
+    line-height: 1.4;
+  }
+
+  .ai-ecuafolk-header__mobile-lang-dropdown-{{ ai_gen_id }} {
+    position: absolute;
+    top: calc(100% + 4px);
+    bottom: auto;
+    right: 0;
+    transform: none;
+    background-color: {{ block.settings.background_color }};
+    border: 1px solid {{ block.settings.border_color }};
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1001;
+    overflow: visible;
+    min-width: 80px;
+  }
+
+  .ai-ecuafolk-header__mobile-lang-option-{{ ai_gen_id }} {
+    display: block;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: {{ block.settings.logo_color }};
+    text-decoration: none;
+    text-align: center;
+  }
+
+  .ai-ecuafolk-header__mobile-lang-option-{{ ai_gen_id }}:hover {
+    background-color: rgba(0,0,0,0.05);
+  }
+
+  .ai-ecuafolk-header__mobile-lang-option-{{ ai_gen_id }}.active {
+    font-weight: 700;
+    color: {{ block.settings.nav_link_color }};
   }
 
   .ai-ecuafolk-header__logo-mobile-image-{{ ai_gen_id }} {
@@ -579,6 +632,35 @@
         </div>
 
         <div class="ai-ecuafolk-header__mobile-right-{{ ai_gen_id }}">
+          {%- if block.settings.show_language_selector and localization.available_languages.size > 1 -%}
+            <localization-form class="ai-ecuafolk-header__mobile-lang-{{ ai_gen_id }}">
+              {%- form 'localization', id: 'MobileLangForm-{{ ai_gen_id }}', class: 'localization-form' -%}
+                <button
+                  type="button"
+                  class="ai-ecuafolk-header__mobile-lang-btn-{{ ai_gen_id }} localization-form__select"
+                  aria-expanded="false"
+                  aria-controls="MobileLangList-{{ ai_gen_id }}"
+                >
+                  {{ request.locale.iso_code | upcase }}
+                </button>
+                <div id="MobileLangList-{{ ai_gen_id }}" class="ai-ecuafolk-header__mobile-lang-dropdown-{{ ai_gen_id }} disclosure__list-wrapper" hidden>
+                  {%- for language in localization.available_languages -%}
+                    <a
+                      class="ai-ecuafolk-header__mobile-lang-option-{{ ai_gen_id }}{% if language.iso_code == request.locale.iso_code %} active{% endif %}"
+                      href="#"
+                      hreflang="{{ language.iso_code }}"
+                      lang="{{ language.iso_code }}"
+                      data-value="{{ language.iso_code }}"
+                      {% if language.iso_code == request.locale.iso_code %}aria-current="true"{% endif %}
+                    >
+                      {{ language.iso_code | upcase }}
+                    </a>
+                  {%- endfor -%}
+                </div>
+                <input type="hidden" name="locale_code" value="{{ localization.language.iso_code }}">
+              {%- endform -%}
+            </localization-form>
+          {%- endif -%}
           <a
             href="/cart"
             class="ai-ecuafolk-header__icon-button-{{ ai_gen_id }}"
