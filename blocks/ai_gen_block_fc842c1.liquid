@@ -25,60 +25,61 @@
     text-align: {{ block.settings.heading_alignment }};
   }
 
-  .ai-category-scroll__wrapper-{{ ai_gen_id }} {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .ai-category-scroll__wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
-    display: none;
-  }
-
+  /* 2-column grid on mobile — no scrolling, all buttons visible */
   .ai-category-scroll__list-{{ ai_gen_id }} {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: {{ block.settings.category_gap_mobile }}px;
-    padding: {{ block.settings.scroll_padding }}px 0;
     margin: 0;
+    padding: 0;
     list-style: none;
   }
 
   .ai-category-scroll__item-{{ ai_gen_id }} {
-    flex: 0 0 auto;
-    width: {{ block.settings.category_size_mobile }}px;
+    display: block;
   }
 
+  /* The entire card is the button */
   .ai-category-scroll__link-{{ ai_gen_id }} {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    gap: {{ block.settings.label_spacing }}px;
-  }
-
-  .ai-category-scroll__image-wrapper-{{ ai_gen_id }} {
+    display: block;
     position: relative;
-    width: {{ block.settings.category_size_mobile }}px;
-    height: {{ block.settings.category_size_mobile }}px;
-    border-radius: 50%;
     overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    text-decoration: none;
     background-color: {{ block.settings.circle_background }};
     border: {{ block.settings.circle_border_width }}px solid {{ block.settings.circle_border_color }};
-    transition: transform 0.3s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .ai-category-scroll__link-{{ ai_gen_id }}:hover .ai-category-scroll__image-wrapper-{{ ai_gen_id }} {
-    transform: scale(1.05);
+  .ai-category-scroll__link-{{ ai_gen_id }}:hover,
+  .ai-category-scroll__link-{{ ai_gen_id }}:focus {
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    outline: none;
+  }
+
+  .ai-category-scroll__link-{{ ai_gen_id }}:active {
+    transform: scale(0.97);
+  }
+
+  /* Square image fills the card */
+  .ai-category-scroll__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
   }
 
   .ai-category-scroll__image-{{ ai_gen_id }} {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
   }
 
+  /* Placeholder shown when no image is uploaded */
   .ai-category-scroll__placeholder-{{ ai_gen_id }} {
     width: 100%;
     height: 100%;
@@ -86,20 +87,29 @@
     align-items: center;
     justify-content: center;
     background-color: {{ block.settings.placeholder_background }};
+    aspect-ratio: 1 / 1;
   }
 
   .ai-category-scroll__placeholder-{{ ai_gen_id }} svg {
-    width: 60%;
-    height: 60%;
-    opacity: 0.3;
+    width: 40%;
+    height: 40%;
+    opacity: 0.25;
   }
 
+  /* Label sits at the bottom of the image with a dark gradient behind it */
   .ai-category-scroll__label-{{ ai_gen_id }} {
-    font-size: {{ block.settings.label_size_mobile }}px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 28px 10px 12px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%);
     color: {{ block.settings.label_color }};
+    font-size: {{ block.settings.label_size_mobile }}px;
+    font-weight: 700;
     text-align: center;
-    word-wrap: break-word;
-    max-width: {{ block.settings.category_size_mobile }}px;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
   }
 
   @media screen and (min-width: 750px) {
@@ -115,141 +125,79 @@
       font-size: {{ block.settings.heading_size_desktop }}px;
     }
 
+    /* 4 columns on desktop — all 4 categories in one row */
     .ai-category-scroll__list-{{ ai_gen_id }} {
+      grid-template-columns: repeat(4, 1fr);
       gap: {{ block.settings.category_gap_desktop }}px;
-      {% if block.settings.center_on_desktop %}
-        justify-content: center;
-      {% endif %}
-    }
-
-    .ai-category-scroll__item-{{ ai_gen_id }} {
-      width: {{ block.settings.category_size_desktop }}px;
-    }
-
-    .ai-category-scroll__image-wrapper-{{ ai_gen_id }} {
-      width: {{ block.settings.category_size_desktop }}px;
-      height: {{ block.settings.category_size_desktop }}px;
     }
 
     .ai-category-scroll__label-{{ ai_gen_id }} {
       font-size: {{ block.settings.label_size_desktop }}px;
-      max-width: {{ block.settings.category_size_desktop }}px;
+      padding: 36px 12px 16px;
     }
   }
 {% endstyle %}
 
-<category-scroll-{{ ai_gen_id }} class="ai-category-scroll-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+<div class="ai-category-scroll-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
   <div class="ai-category-scroll__container-{{ ai_gen_id }}">
     {% if block.settings.heading != blank %}
       <h2 class="ai-category-scroll__heading-{{ ai_gen_id }}">{{ block.settings.heading }}</h2>
     {% endif %}
 
-    <div class="ai-category-scroll__wrapper-{{ ai_gen_id }}">
-      <ul class="ai-category-scroll__list-{{ ai_gen_id }}">
-        {% for i in (1..8) %}
-          {% liquid
-            assign category_enabled_key = 'category_' | append: i | append: '_enabled'
-            assign category_label_key = 'category_' | append: i | append: '_label'
-            assign category_image_key = 'category_' | append: i | append: '_image'
-            assign category_collection_key = 'category_' | append: i | append: '_collection'
+    <ul class="ai-category-scroll__list-{{ ai_gen_id }}">
+      {% for i in (1..8) %}
+        {% liquid
+          assign category_enabled_key = 'category_' | append: i | append: '_enabled'
+          assign category_label_key = 'category_' | append: i | append: '_label'
+          assign category_image_key = 'category_' | append: i | append: '_image'
+          assign category_collection_key = 'category_' | append: i | append: '_collection'
 
-            assign category_enabled = block.settings[category_enabled_key]
-            assign category_label = block.settings[category_label_key]
-            assign category_image = block.settings[category_image_key]
-            assign category_collection = block.settings[category_collection_key]
-          %}
+          assign category_enabled = block.settings[category_enabled_key]
+          assign category_label = block.settings[category_label_key]
+          assign category_image = block.settings[category_image_key]
+          assign category_collection = block.settings[category_collection_key]
+        %}
 
-          {% if category_enabled %}
-            <li class="ai-category-scroll__item-{{ ai_gen_id }}">
-              {% if category_collection != blank %}
-                <a href="{{ category_collection.url }}" class="ai-category-scroll__link-{{ ai_gen_id }}">
-              {% else %}
-                <div class="ai-category-scroll__link-{{ ai_gen_id }}">
-              {% endif %}
-                
-                <div class="ai-category-scroll__image-wrapper-{{ ai_gen_id }}">
-                  {% if category_image != blank %}
-                    <img
-                      src="{{ category_image | image_url: width: 400 }}"
-                      alt="{{ category_label | escape }}"
-                      class="ai-category-scroll__image-{{ ai_gen_id }}"
-                      loading="lazy"
-                      width="400"
-                      height="400"
-                    >
-                  {% else %}
-                    <div class="ai-category-scroll__placeholder-{{ ai_gen_id }}">
-                      {{ 'product-1' | placeholder_svg_tag }}
-                    </div>
-                  {% endif %}
-                </div>
+        {% if category_enabled %}
+          <li class="ai-category-scroll__item-{{ ai_gen_id }}">
+            {% if category_collection != blank %}
+              <a href="{{ category_collection.url }}" class="ai-category-scroll__link-{{ ai_gen_id }}" aria-label="{{ category_label | escape }}">
+            {% else %}
+              <div class="ai-category-scroll__link-{{ ai_gen_id }}">
+            {% endif %}
+
+              <div class="ai-category-scroll__image-wrapper-{{ ai_gen_id }}">
+                {% if category_image != blank %}
+                  <img
+                    src="{{ category_image | image_url: width: 600 }}"
+                    alt="{{ category_label | escape }}"
+                    class="ai-category-scroll__image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="600"
+                    height="600"
+                  >
+                {% else %}
+                  <div class="ai-category-scroll__placeholder-{{ ai_gen_id }}">
+                    {{ 'product-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
 
                 {% if category_label != blank %}
                   <span class="ai-category-scroll__label-{{ ai_gen_id }}">{{ category_label }}</span>
                 {% endif %}
+              </div>
 
-              {% if category_collection != blank %}
-                </a>
-              {% else %}
-                </div>
-              {% endif %}
-            </li>
-          {% endif %}
-        {% endfor %}
-      </ul>
-    </div>
+            {% if category_collection != blank %}
+              </a>
+            {% else %}
+              </div>
+            {% endif %}
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
   </div>
-</category-scroll-{{ ai_gen_id }}>
-
-<script>
-  (function() {
-    class CategoryScroll{{ ai_gen_id }} extends HTMLElement {
-      constructor() {
-        super();
-      }
-
-      connectedCallback() {
-        this.wrapper = this.querySelector('.ai-category-scroll__wrapper-{{ ai_gen_id }}');
-        this.setupTouchScroll();
-      }
-
-      setupTouchScroll() {
-        if (!this.wrapper) return;
-
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-
-        this.wrapper.addEventListener('mousedown', (e) => {
-          isDown = true;
-          this.wrapper.style.cursor = 'grabbing';
-          startX = e.pageX - this.wrapper.offsetLeft;
-          scrollLeft = this.wrapper.scrollLeft;
-        });
-
-        this.wrapper.addEventListener('mouseleave', () => {
-          isDown = false;
-          this.wrapper.style.cursor = 'grab';
-        });
-
-        this.wrapper.addEventListener('mouseup', () => {
-          isDown = false;
-          this.wrapper.style.cursor = 'grab';
-        });
-
-        this.wrapper.addEventListener('mousemove', (e) => {
-          if (!isDown) return;
-          e.preventDefault();
-          const x = e.pageX - this.wrapper.offsetLeft;
-          const walk = (x - startX) * 2;
-          this.wrapper.scrollLeft = scrollLeft - walk;
-        });
-      }
-    }
-
-    customElements.define('category-scroll-{{ ai_gen_id }}', CategoryScroll{{ ai_gen_id }});
-  })();
-</script>
+</div>
 
 {% schema %}
 {
@@ -374,84 +322,48 @@
     },
     {
       "type": "header",
-      "content": "Category style"
-    },
-    {
-      "type": "range",
-      "id": "category_size_mobile",
-      "label": "Circle size (mobile)",
-      "min": 60,
-      "max": 140,
-      "step": 10,
-      "unit": "px",
-      "default": 90
-    },
-    {
-      "type": "range",
-      "id": "category_size_desktop",
-      "label": "Circle size (desktop)",
-      "min": 80,
-      "max": 200,
-      "step": 10,
-      "unit": "px",
-      "default": 120
+      "content": "Button style"
     },
     {
       "type": "range",
       "id": "category_gap_mobile",
-      "label": "Gap between items (mobile)",
+      "label": "Gap between buttons (mobile)",
       "min": 8,
       "max": 40,
       "step": 4,
       "unit": "px",
-      "default": 16
+      "default": 12
     },
     {
       "type": "range",
       "id": "category_gap_desktop",
-      "label": "Gap between items (desktop)",
+      "label": "Gap between buttons (desktop)",
       "min": 12,
       "max": 60,
       "step": 4,
       "unit": "px",
-      "default": 24
-    },
-    {
-      "type": "range",
-      "id": "scroll_padding",
-      "label": "Scroll padding",
-      "min": 0,
-      "max": 20,
-      "step": 2,
-      "unit": "px",
-      "default": 4
-    },
-    {
-      "type": "checkbox",
-      "id": "center_on_desktop",
-      "label": "Center categories on desktop",
-      "default": false
+      "default": 20
     },
     {
       "type": "color",
       "id": "circle_background",
-      "label": "Circle background",
+      "label": "Card background (when no image)",
       "default": "#f3f3f3"
     },
     {
       "type": "range",
       "id": "circle_border_width",
-      "label": "Circle border width",
+      "label": "Card border width",
       "min": 0,
       "max": 6,
       "step": 1,
       "unit": "px",
-      "default": 2
+      "default": 0
     },
     {
       "type": "color",
       "id": "circle_border_color",
-      "label": "Circle border color",
+      "label": "Card border color",
       "default": "#e0e0e0"
     },
     {
@@ -468,37 +380,27 @@
       "type": "range",
       "id": "label_size_mobile",
       "label": "Label size (mobile)",
-      "min": 10,
-      "max": 20,
+      "min": 12,
+      "max": 24,
       "step": 1,
       "unit": "px",
-      "default": 13
+      "default": 16
     },
     {
       "type": "range",
       "id": "label_size_desktop",
       "label": "Label size (desktop)",
-      "min": 12,
-      "max": 24,
+      "min": 14,
+      "max": 32,
       "step": 1,
       "unit": "px",
-      "default": 15
-    },
-    {
-      "type": "range",
-      "id": "label_spacing",
-      "label": "Label spacing",
-      "min": 4,
-      "max": 20,
-      "step": 2,
-      "unit": "px",
-      "default": 8
+      "default": 20
     },
     {
       "type": "color",
       "id": "label_color",
-      "label": "Label color",
-      "default": "#121212"
+      "label": "Label text color",
+      "default": "#ffffff"
     },
     {
       "type": "header",
