@@ -467,14 +467,14 @@
               >
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
               </svg>
-              <span>{{ block.settings.current_language_code }}</span>
+              <span>{{ request.locale.iso_code | upcase }}</span>
             </button>
 
             <div class="ai-ecuafolk-header__language-dropdown-{{ ai_gen_id }}" data-language-dropdown>
               {% if block.settings.language_1_code != blank %}
                 <button
-                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if block.settings.current_language_code == block.settings.language_1_code %}active{% endif %}"
-                  data-language="{{ block.settings.language_1_code }}"
+                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if request.locale.iso_code == block.settings.language_1_code | downcase %}active{% endif %}"
+                  data-language="{{ block.settings.language_1_code | downcase }}"
                 >
                   {{ block.settings.language_1_name }}
                 </button>
@@ -482,8 +482,8 @@
 
               {% if block.settings.language_2_code != blank %}
                 <button
-                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if block.settings.current_language_code == block.settings.language_2_code %}active{% endif %}"
-                  data-language="{{ block.settings.language_2_code }}"
+                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if request.locale.iso_code == block.settings.language_2_code | downcase %}active{% endif %}"
+                  data-language="{{ block.settings.language_2_code | downcase }}"
                 >
                   {{ block.settings.language_2_name }}
                 </button>
@@ -491,8 +491,8 @@
 
               {% if block.settings.language_3_code != blank %}
                 <button
-                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if block.settings.current_language_code == block.settings.language_3_code %}active{% endif %}"
-                  data-language="{{ block.settings.language_3_code }}"
+                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if request.locale.iso_code == block.settings.language_3_code | downcase %}active{% endif %}"
+                  data-language="{{ block.settings.language_3_code | downcase }}"
                 >
                   {{ block.settings.language_3_name }}
                 </button>
@@ -772,7 +772,7 @@
             const localeInput = document.getElementById('locale-code-{{ ai_gen_id }}');
             const localizationForm = document.getElementById('localization-form-{{ ai_gen_id }}');
             if (localeInput && localizationForm) {
-              localeInput.value = languageCode;
+              localeInput.value = languageCode.toLowerCase();
               localizationForm.submit();
             }
           });
