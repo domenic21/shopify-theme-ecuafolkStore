@@ -155,17 +155,8 @@
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     min-width: 150px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
     z-index: 1000;
-  }
-
-  .ai-ecuafolk-header__language-dropdown-{{ ai_gen_id }}.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    padding: 4px 0;
   }
 
   .ai-ecuafolk-header__language-option-{{ ai_gen_id }} {
@@ -447,59 +438,39 @@
       </nav>
 
       <div class="ai-ecuafolk-header__right-{{ ai_gen_id }}">
-        {% if block.settings.show_language_selector %}
-          {%- form 'localization', id: 'localization-form-{{ ai_gen_id }}' -%}
-            <input type="hidden" name="locale_code" id="locale-code-{{ ai_gen_id }}" value="{{ request.locale.iso_code }}">
-          {%- endform -%}
-          <div class="ai-ecuafolk-header__language-selector-{{ ai_gen_id }}">
-            <button
-              class="ai-ecuafolk-header__language-button-{{ ai_gen_id }}"
-              aria-label="Select language"
-              aria-expanded="false"
-              data-language-toggle
-            >
-              <svg
-                class="ai-ecuafolk-header__language-icon-{{ ai_gen_id }}"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+        {%- if block.settings.show_language_selector and localization.available_languages.size > 1 -%}
+          <localization-form class="ai-ecuafolk-header__language-selector-{{ ai_gen_id }}" data-prevent-hide>
+            {%- form 'localization', id: 'EcuaFolkLangForm-{{ ai_gen_id }}', class: 'localization-form' -%}
+              <button
+                type="button"
+                class="ai-ecuafolk-header__language-button-{{ ai_gen_id }} localization-form__select"
+                aria-label="Select language"
+                aria-expanded="false"
+                aria-controls="EcuaFolkLangList-{{ ai_gen_id }}"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-              </svg>
-              <span>{{ request.locale.iso_code | upcase }}</span>
-            </button>
-
-            <div class="ai-ecuafolk-header__language-dropdown-{{ ai_gen_id }}" data-language-dropdown>
-              {% if block.settings.language_1_code != blank %}
-                <button
-                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if request.locale.iso_code == block.settings.language_1_code | downcase %}active{% endif %}"
-                  data-language="{{ block.settings.language_1_code | downcase }}"
-                >
-                  {{ block.settings.language_1_name }}
-                </button>
-              {% endif %}
-
-              {% if block.settings.language_2_code != blank %}
-                <button
-                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if request.locale.iso_code == block.settings.language_2_code | downcase %}active{% endif %}"
-                  data-language="{{ block.settings.language_2_code | downcase }}"
-                >
-                  {{ block.settings.language_2_name }}
-                </button>
-              {% endif %}
-
-              {% if block.settings.language_3_code != blank %}
-                <button
-                  class="ai-ecuafolk-header__language-option-{{ ai_gen_id }} {% if request.locale.iso_code == block.settings.language_3_code | downcase %}active{% endif %}"
-                  data-language="{{ block.settings.language_3_code | downcase }}"
-                >
-                  {{ block.settings.language_3_name }}
-                </button>
-              {% endif %}
-            </div>
-          </div>
-        {% endif %}
+                <svg class="ai-ecuafolk-header__language-icon-{{ ai_gen_id }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+                <span>{{ request.locale.iso_code | upcase }}</span>
+              </button>
+              <div id="EcuaFolkLangList-{{ ai_gen_id }}" class="ai-ecuafolk-header__language-dropdown-{{ ai_gen_id }} disclosure__list-wrapper" hidden>
+                {%- for language in localization.available_languages -%}
+                  <a
+                    class="ai-ecuafolk-header__language-option-{{ ai_gen_id }}{% if language.iso_code == request.locale.iso_code %} active{% endif %}"
+                    href="#"
+                    hreflang="{{ language.iso_code }}"
+                    lang="{{ language.iso_code }}"
+                    data-value="{{ language.iso_code }}"
+                    {% if language.iso_code == request.locale.iso_code %}aria-current="true"{% endif %}
+                  >
+                    {{ language.endonym_name | capitalize }}
+                  </a>
+                {%- endfor -%}
+              </div>
+              <input type="hidden" name="locale_code" value="{{ localization.language.iso_code }}">
+            {%- endform -%}
+          </localization-form>
+        {%- endif -%}
 
         <button
           class="ai-ecuafolk-header__icon-button-{{ ai_gen_id }} search-trigger"
@@ -720,9 +691,6 @@
 
       connectedCallback() {
         this.hamburger = this.querySelector('.ai-ecuafolk-header__hamburger-{{ ai_gen_id }}');
-        this.languageToggle = this.querySelector('[data-language-toggle]');
-        this.languageDropdown = this.querySelector('[data-language-dropdown]');
-        this.languageOptions = this.querySelectorAll('[data-language]');
         this.mobileMenuToggle = this.querySelector('[data-mobile-menu-toggle]');
         this.mobileMenu = this.querySelector('[data-mobile-menu]');
         this.mobileMenuClose = this.querySelector('[data-mobile-menu-close]');
@@ -737,46 +705,6 @@
             this.hamburger.setAttribute('aria-expanded', !isExpanded);
           });
         }
-
-        if (this.languageToggle && this.languageDropdown) {
-          this.languageToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isExpanded = this.languageToggle.getAttribute('aria-expanded') === 'true';
-            this.languageToggle.setAttribute('aria-expanded', !isExpanded);
-            this.languageDropdown.classList.toggle('active');
-          });
-
-          document.addEventListener('click', (e) => {
-            if (!this.contains(e.target)) {
-              this.languageToggle.setAttribute('aria-expanded', 'false');
-              this.languageDropdown.classList.remove('active');
-            }
-          });
-        }
-
-        this.languageOptions.forEach(option => {
-          option.addEventListener('click', () => {
-            const languageCode = option.getAttribute('data-language');
-            this.languageOptions.forEach(opt => opt.classList.remove('active'));
-            option.classList.add('active');
-            
-            const languageText = this.languageToggle.querySelector('span');
-            if (languageText) {
-              languageText.textContent = languageCode;
-            }
-            
-            this.languageToggle.setAttribute('aria-expanded', 'false');
-            this.languageDropdown.classList.remove('active');
-
-            // Submit Shopify localization form to actually switch the language
-            const localeInput = document.getElementById('locale-code-{{ ai_gen_id }}');
-            const localizationForm = document.getElementById('localization-form-{{ ai_gen_id }}');
-            if (localeInput && localizationForm) {
-              localeInput.value = languageCode.toLowerCase();
-              localizationForm.submit();
-            }
-          });
-        });
 
         if (this.mobileMenuToggle && this.mobileMenu && this.mobileOverlay) {
           this.mobileMenuToggle.addEventListener('click', () => {
