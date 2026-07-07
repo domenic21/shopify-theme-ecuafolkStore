@@ -423,7 +423,7 @@
         </button>
 
         {% if block.settings.logo_image != blank %}
-          <a href="/" class="ai-ecuafolk-header__logo-image-wrapper-{{ ai_gen_id }}">
+          <a href="{{ routes.root_url }}" class="ai-ecuafolk-header__logo-image-wrapper-{{ ai_gen_id }}">
             <img
               src="{{ block.settings.logo_image | image_url: height: block.settings.logo_image_height }}"
               alt="{{ shop.name }}"
@@ -434,7 +434,7 @@
             >
           </a>
         {% else %}
-          <a href="/" class="ai-ecuafolk-header__logo-{{ ai_gen_id }}">
+          <a href="{{ routes.root_url }}" class="ai-ecuafolk-header__logo-{{ ai_gen_id }}">
             {{ block.settings.logo_text }}
           </a>
         {% endif %}
@@ -550,7 +550,7 @@
         </button>
 
         <a
-          href="/cart"
+          href="{{ routes.cart_url }}"
           class="ai-ecuafolk-header__icon-button-{{ ai_gen_id }}"
           aria-label="Cart with {{ cart.item_count }} items"
         >
@@ -569,7 +569,7 @@
         </a>
 
         <a
-          href="/account"
+          href="{%- if customer -%}{{ routes.account_url }}{%- else -%}{{ routes.account_login_url }}{%- endif -%}"
           class="ai-ecuafolk-header__icon-button-{{ ai_gen_id }}"
           aria-label="Account"
         >
@@ -609,7 +609,7 @@
 
         <div class="ai-ecuafolk-header__mobile-center-{{ ai_gen_id }}">
           {% if block.settings.mobile_logo_image != blank %}
-            <a href="/">
+            <a href="{{ routes.root_url }}">
               <img
                 src="{{ block.settings.mobile_logo_image | image_url: height: block.settings.mobile_logo_height }}"
                 alt="{{ shop.name }}"
@@ -620,7 +620,7 @@
               >
             </a>
           {% elsif block.settings.logo_image != blank %}
-            <a href="/">
+            <a href="{{ routes.root_url }}">
               <img
                 src="{{ block.settings.logo_image | image_url: height: block.settings.mobile_logo_height }}"
                 alt="{{ shop.name }}"
@@ -631,7 +631,7 @@
               >
             </a>
           {% else %}
-            <a href="/" class="ai-ecuafolk-header__logo-mobile-text-{{ ai_gen_id }}">
+            <a href="{{ routes.root_url }}" class="ai-ecuafolk-header__logo-mobile-text-{{ ai_gen_id }}">
               {{ block.settings.logo_text }}
             </a>
           {% endif %}
@@ -668,7 +668,7 @@
             </localization-form>
           {%- endif -%}
           <a
-            href="/cart"
+            href="{{ routes.cart_url }}"
             class="ai-ecuafolk-header__icon-button-{{ ai_gen_id }}"
             aria-label="Cart with {{ cart.item_count }} items"
           >

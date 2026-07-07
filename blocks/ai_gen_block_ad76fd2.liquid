@@ -24,7 +24,7 @@
   }
 
   .ai-featured-collection__title-{{ ai_gen_id }} {
-    font-size: 24px;
+    font-size: 24px; 
     font-weight: 700;
     margin: 0;
     color: {{ block.settings.title_color }};
@@ -229,7 +229,11 @@
                 {% if product.featured_image %}
                   <img
                     src="{{ product.featured_image | image_url: width: 600 }}"
-                    alt="{{ product.featured_image.alt | escape }}"
+                    srcset="{{ product.featured_image | image_url: width: 300 }} 300w,
+                            {{ product.featured_image | image_url: width: 600 }} 600w,
+                            {{ product.featured_image | image_url: width: 900 }} 900w"
+                    sizes="(min-width: 750px) 25vw, 50vw"
+                    alt="{{ product.featured_image.alt | default: product.title | escape }}"
                     class="ai-featured-collection__product-image-{{ ai_gen_id }}"
                     loading="lazy"
                     width="600"
