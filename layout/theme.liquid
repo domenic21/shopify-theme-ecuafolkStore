@@ -377,108 +377,99 @@
       <script src="{{ 'cart-drawer.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
 
-    <!-- Global search overlay: always present on every page so search-trigger works site-wide -->
-    <div id="ecuafolk-global-search-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;overflow-y:auto;">
-      <button id="ecuafolk-search-close" type="button" aria-label="Cerrar búsqueda" style="position:fixed;top:20px;right:20px;background:#333;color:#fff;border:none;border-radius:8px;width:48px;height:48px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100000;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-      <div id="ecuafolk-search-content" style="width:100%;max-width:640px;margin:80px auto 40px;padding:0 20px;box-sizing:border-box;">
-        <div style="position:relative;margin-bottom:20px;">
-          <input id="ecuafolk-search-input" type="text" placeholder="Buscar productos..." autocomplete="off" style="width:100%;padding:18px 24px;font-size:18px;border:2px solid #555;border-radius:8px;background:#1a1a1a;color:#fff;outline:none;box-sizing:border-box;">
+    <!-- Global search overlay: white card design, works on every page -->
+    <div id="ecuafolk-search-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;">
+      <div id="ecuafolk-search-backdrop" style="position:absolute;top:0;left:0;width:100%;height:100%;background:#000;opacity:0.8;"></div>
+      <div style="position:relative;width:100%;max-width:700px;margin:0 auto;padding:60px 20px 20px;height:100%;overflow-y:auto;box-sizing:border-box;">
+        <button id="ecuafolk-search-close" type="button" aria-label="Cerrar búsqueda" style="position:absolute;top:20px;right:20px;width:48px;height:48px;background:#fff;color:#121212;border:none;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div style="background:#fff;border-radius:8px;padding:30px;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+          <div style="margin-bottom:20px;">
+            <input id="ecuafolk-search-input" type="text" placeholder="Buscar productos..." autocomplete="off" aria-label="Buscar productos" style="width:100%;padding:18px 24px;font-size:18px;border:2px solid #e0e0e0;border-radius:4px;background:#f9f9f9;color:#121212;outline:none;box-sizing:border-box;">
+          </div>
+          <div id="ecuafolk-search-loading" style="text-align:center;padding:20px;color:#666;display:none;">Buscando...</div>
+          <div id="ecuafolk-search-results" style="margin-top:20px;"></div>
         </div>
-        <div id="ecuafolk-search-loading" style="text-align:center;color:#aaa;padding:12px;display:none;">Buscando...</div>
-        <div id="ecuafolk-search-results"></div>
       </div>
     </div>
-
     <style>
-      #ecuafolk-search-input:focus { border-color:#dc143c; }
-      .ecuafolk-result-item { display:flex;gap:16px;padding:14px;background:#222;border-radius:8px;margin-bottom:10px;text-decoration:none;color:#fff;transition:background 0.2s; }
-      .ecuafolk-result-item:hover { background:#333; }
-      .ecuafolk-result-img { width:70px;height:70px;flex-shrink:0;border-radius:6px;overflow:hidden;background:#333; }
-      .ecuafolk-result-img img { width:100%;height:100%;object-fit:cover; }
-      .ecuafolk-result-info { display:flex;flex-direction:column;justify-content:center;gap:4px; }
-      .ecuafolk-result-title { font-size:15px;font-weight:600; }
-      .ecuafolk-result-price { font-size:14px;color:#dc143c;font-weight:600; }
-      .ecuafolk-no-results { text-align:center;color:#aaa;padding:30px;font-size:16px; }
+      #ecuafolk-search-close:hover { background:#f3f3f3 !important; }
+      #ecuafolk-search-input:focus { border-color:#334fb4 !important; }
     </style>
-
     <script>
-      (function() {
-        var overlay = document.getElementById('ecuafolk-global-search-overlay');
-        var closeBtn = document.getElementById('ecuafolk-search-close');
-        var searchContent = document.getElementById('ecuafolk-search-content');
-        var input = document.getElementById('ecuafolk-search-input');
-        var results = document.getElementById('ecuafolk-search-results');
-        var loading = document.getElementById('ecuafolk-search-loading');
-        var searchTimer = null;
+    (function() {
+      var overlay = document.getElementById('ecuafolk-search-overlay');
+      var backdrop = document.getElementById('ecuafolk-search-backdrop');
+      var closeBtn = document.getElementById('ecuafolk-search-close');
+      var input = document.getElementById('ecuafolk-search-input');
+      var results = document.getElementById('ecuafolk-search-results');
+      var loading = document.getElementById('ecuafolk-search-loading');
+      var searchTimeout = null;
 
-        function openOverlay() {
-          overlay.style.display = 'block';
-          document.body.style.overflow = 'hidden';
-          setTimeout(function() { input.focus(); }, 100);
+      function openOverlay() {
+        overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        setTimeout(function() { input.focus(); }, 100);
+      }
+
+      function closeOverlay() {
+        overlay.style.display = 'none';
+        document.body.style.overflow = '';
+        input.value = '';
+        results.innerHTML = '';
+        loading.style.display = 'none';
+      }
+
+      window.openSearchOverlay = openOverlay;
+      window.closeSearchOverlay = closeOverlay;
+
+      closeBtn.addEventListener('click', closeOverlay);
+      closeBtn.onclick = closeOverlay;
+      backdrop.addEventListener('click', closeOverlay);
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeOverlay();
+      });
+
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('.search-trigger')) {
+          e.preventDefault();
+          openOverlay();
         }
+      });
 
-        function closeOverlay() {
-          overlay.style.display = 'none';
-          document.body.style.overflow = '';
-          input.value = '';
-          results.innerHTML = '';
-          loading.style.display = 'none';
-        }
-
-        // Expose globally so other scripts can call them
-        window.openSearchOverlay = openOverlay;
-        window.closeSearchOverlay = closeOverlay;
-
-        // Close button
-        closeBtn.addEventListener('click', closeOverlay);
-
-        // Close on backdrop click — only fires when clicking the dark overlay itself, not the content box
-        overlay.addEventListener('click', function(e) {
-          if (e.target === overlay) closeOverlay();
-        });
-
-        // Close on Escape
-        document.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape') closeOverlay();
-        });
-
-        // Open when any .search-trigger is clicked
-        document.addEventListener('click', function(e) {
-          if (e.target.closest('.search-trigger')) {
-            e.preventDefault();
-            openOverlay();
-          }
-        });
-
-        // Live search
-        input.addEventListener('input', function() {
-          clearTimeout(searchTimer);
-          var q = input.value.trim();
-          results.innerHTML = '';
-          if (q.length < 2) { loading.style.display = 'none'; return; }
-          loading.style.display = 'block';
-          searchTimer = setTimeout(function() {
-            fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=8')
-              .then(function(r) { return r.json(); })
-              .then(function(data) {
-                loading.style.display = 'none';
-                var products = (data.resources && data.resources.results && data.resources.results.products) || [];
-                if (products.length === 0) {
-                  results.innerHTML = '<div class="ecuafolk-no-results">No se encontraron productos</div>';
-                  return;
-                }
-                results.innerHTML = products.map(function(p) {
-                  var price = p.price ? '$' + parseFloat(p.price).toFixed(2) + ' USD' : '';
-                  var img = p.image ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy">' : '';
-                  return '<a href="' + p.url + '" class="ecuafolk-result-item"><div class="ecuafolk-result-img">' + img + '</div><div class="ecuafolk-result-info"><div class="ecuafolk-result-title">' + p.title + '</div><div class="ecuafolk-result-price">' + price + '</div></div></a>';
-                }).join('');
-              })
-              .catch(function() { loading.style.display = 'none'; });
-          }, 300);
-        });
-      })();
+      input.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        var q = input.value.trim();
+        results.innerHTML = '';
+        if (q.length < 2) { loading.style.display = 'none'; return; }
+        loading.style.display = 'block';
+        searchTimeout = setTimeout(function() {
+          fetch('/search/suggest.json?q=' + encodeURIComponent(q) + '&resources[type]=product&resources[limit]=8')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              loading.style.display = 'none';
+              var products = (data.resources && data.resources.results && data.resources.results.products) || [];
+              if (!products.length) {
+                results.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#666;">No se encontraron productos</div>';
+                return;
+              }
+              results.innerHTML = products.map(function(p) {
+                var price = p.price ? '$' + parseFloat(p.price).toFixed(2) + ' USD' : '';
+                var img = p.image ? '<img src="' + p.image + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;">' : '';
+                return '<a href="' + p.url + '" style="display:flex;gap:16px;padding:16px;background:#f9f9f9;border-radius:6px;margin-bottom:12px;text-decoration:none;color:#121212;">'
+                  + '<div style="width:80px;height:80px;flex-shrink:0;border-radius:4px;overflow:hidden;">' + img + '</div>'
+                  + '<div style="flex-grow:1;display:flex;flex-direction:column;justify-content:center;">'
+                  + '<div style="font-size:16px;font-weight:600;margin-bottom:6px;">' + p.title + '</div>'
+                  + '<div style="font-size:14px;color:#334fb4;font-weight:500;">' + price + '</div>'
+                  + '</div></a>';
+              }).join('');
+            })
+            .catch(function() { loading.style.display = 'none'; });
+        }, 300);
+      });
+    })();
     </script>
     <!-- Global cart badge updater: keeps [data-cart-badge] elements in sync after AJAX cart changes -->
     <script>
