@@ -374,23 +374,20 @@
     {%- endif -%}
 
     <!-- Global search overlay: always present on every page so search-trigger works site-wide -->
-    <div id="ecuafolk-global-search-overlay" style="display:block;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;opacity:0;visibility:hidden;transition:opacity 0.3s ease,visibility 0.3s ease;pointer-events:none;">
-      <div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;padding:20px;overflow-y:auto;">
-        <button id="ecuafolk-search-close" type="button" aria-label="Cerrar búsqueda" style="position:absolute;top:20px;right:20px;background:#333;color:#fff;border:none;border-radius:8px;width:48px;height:48px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-        <div id="ecuafolk-search-content" style="width:100%;max-width:640px;margin-top:80px;">
-          <div style="position:relative;margin-bottom:20px;">
-            <input id="ecuafolk-search-input" type="text" placeholder="Buscar productos..." autocomplete="off" style="width:100%;padding:18px 24px;font-size:18px;border:2px solid #555;border-radius:8px;background:#1a1a1a;color:#fff;outline:none;box-sizing:border-box;">
-          </div>
-          <div id="ecuafolk-search-loading" style="text-align:center;color:#aaa;padding:12px;display:none;">Buscando...</div>
-          <div id="ecuafolk-search-results"></div>
+    <div id="ecuafolk-global-search-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;overflow-y:auto;">
+      <button id="ecuafolk-search-close" type="button" aria-label="Cerrar búsqueda" style="position:fixed;top:20px;right:20px;background:#333;color:#fff;border:none;border-radius:8px;width:48px;height:48px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100000;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div id="ecuafolk-search-content" style="width:100%;max-width:640px;margin:80px auto 40px;padding:0 20px;box-sizing:border-box;">
+        <div style="position:relative;margin-bottom:20px;">
+          <input id="ecuafolk-search-input" type="text" placeholder="Buscar productos..." autocomplete="off" style="width:100%;padding:18px 24px;font-size:18px;border:2px solid #555;border-radius:8px;background:#1a1a1a;color:#fff;outline:none;box-sizing:border-box;">
         </div>
+        <div id="ecuafolk-search-loading" style="text-align:center;color:#aaa;padding:12px;display:none;">Buscando...</div>
+        <div id="ecuafolk-search-results"></div>
       </div>
     </div>
 
     <style>
-      #ecuafolk-global-search-overlay.is-open { opacity:1; visibility:visible; pointer-events:auto; }
       #ecuafolk-search-input:focus { border-color:#dc143c; }
       .ecuafolk-result-item { display:flex;gap:16px;padding:14px;background:#222;border-radius:8px;margin-bottom:10px;text-decoration:none;color:#fff;transition:background 0.2s; }
       .ecuafolk-result-item:hover { background:#333; }
@@ -413,17 +410,13 @@
         var searchTimer = null;
 
         function openOverlay() {
-          overlay.style.opacity = '1';
-          overlay.style.visibility = 'visible';
-          overlay.style.pointerEvents = 'auto';
+          overlay.style.display = 'block';
           document.body.style.overflow = 'hidden';
           setTimeout(function() { input.focus(); }, 100);
         }
 
         function closeOverlay() {
-          overlay.style.opacity = '0';
-          overlay.style.visibility = 'hidden';
-          overlay.style.pointerEvents = 'none';
+          overlay.style.display = 'none';
           document.body.style.overflow = '';
           input.value = '';
           results.innerHTML = '';
@@ -437,9 +430,9 @@
         // Close button
         closeBtn.addEventListener('click', closeOverlay);
 
-        // Close on backdrop click — check the click is outside the search content box
+        // Close on backdrop click — only fires when clicking the dark overlay itself, not the content box
         overlay.addEventListener('click', function(e) {
-          if (!searchContent.contains(e.target)) closeOverlay();
+          if (e.target === overlay) closeOverlay();
         });
 
         // Close on Escape
